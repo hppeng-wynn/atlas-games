@@ -45,6 +45,8 @@ class DiscordBot():
 
             if message.content.startswith('$hello'):
                 await message.channel.send('Hello!')
+            elif message.content == '$deez':
+                await message.channel.send('nuts')
             elif message.content.startswith('$bind'):
                 self._bind_channel = message.channel
                 await message.channel.send('Bound to '+message.channel.name)
