@@ -22,6 +22,7 @@ class DiscordBot():
         self._message_lock = Lock()
         self._messages = []
         self._bind_channel = None
+        self._running = True
 
         @self._client.event
         async def on_ready():
@@ -40,6 +41,9 @@ class DiscordBot():
             - $hello: ping (sends "Hello!" message)
             - $bind:  bind bot to current channel
             """
+            if not self._running:
+                return
+
             if message.author == self._client.user:
                 return
 
@@ -70,8 +74,22 @@ class DiscordBot():
         """
         Queue a new message to be sent by the bot.
         """
+
+        if not self._running:
+            return False
+
         with self._message_lock:
             self._messages.append(text)
+        return True
+
+    def start(self):
+        self._running = True
+
+    def pause(self):
+        self._running = False
+
+    def is_running(self):
+        return self._running
 
     def run(self):
         """
@@ -110,9 +128,18 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             path = path[5:]
             if path == "ping":
+                message = "pong"
                 BOT_OBJ.queue_message("Pong!")
-
-            message = "Hello, World! " + path
+            elif path == "start":
+                message = "Listening on discord"
+                BOT_OBJ.start()
+            elif path == "pause":
+                message = "Pausing bot"
+                BOT_OBJ.pause()
+            elif path == "status":
+                message = "Running status: " + str(BOT_OBJ.is_running())
+            else:
+                message = "/api/help"
             self.wfile.write(bytes(message, "utf8"))
 
         else:
