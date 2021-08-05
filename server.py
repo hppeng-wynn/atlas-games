@@ -9,6 +9,8 @@ SERVER_PORT = int(os.environ['PORT'])
 import discord
 from discord.ext import tasks
 
+from typing import Union
+
 class DiscordBot():
     """
     Class handling interactions with the discord bot.
@@ -33,13 +35,13 @@ class DiscordBot():
             loop.start()
 
         @self._client.event
-        async def on_message(message):
+        async def on_message(message: discord.Message):
             """
             Callback triggered when a message is sent in a channel viewable by this bot.
 
             Behavior for now:
             - $hello: ping (sends "Hello!" message)
-            - $bind:  bind bot to current channel
+            - $host:  bind bot to current channel
             """
             if not self._running:
                 return
@@ -48,12 +50,17 @@ class DiscordBot():
                 return
 
             if message.content.startswith('$hello'):
-                await message.channel.send('Hello!')
-            elif message.content.startswith('$deez'):
-                await message.channel.send('nuts')
-            elif message.content.startswith('$bind'):
-                self._bind_channel = message.channel
+                await message.channel.send(f"Hello! I'm on port {SERVER_PORT}")
+            elif message.content.startswith('$host'):
+                with self._message_lock:
+                    self._messages = []
+                    self._bind_channel = message.channel
                 await message.channel.send('Bound to '+message.channel.name)
+
+        @self._client.event
+        async def on_reaction_add(reaction: discord.Reaction,
+                                  user: Union[discord.Member, discord.User]):
+            await reaction.message.add_reaction(reaction.emoji)
 
         @tasks.loop(seconds=1.0)
         async def loop():
@@ -70,11 +77,12 @@ class DiscordBot():
                         await self._bind_channel.send(text)
                     self._messages = []
 
-    def queue_message(self, text):
+    def queue_message(self, text: str) -> bool:
         """
         Queue a new message to be sent by the bot.
-        """
 
+        Return: True on success, false if bot is not running.
+        """
         if not self._running:
             return False
 
@@ -88,7 +96,7 @@ class DiscordBot():
     def pause(self):
         self._running = False
 
-    def is_running(self):
+    def is_running(self) -> bool:
         return self._running
 
     def run(self):
@@ -149,7 +157,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
                     return super().do_GET()
             self.send_error(403)
 
-def start_server(port):
+def start_server(port: int):
     """
     Start an http server on a separate thread.
     TODO: separate process much?
