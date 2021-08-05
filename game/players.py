@@ -12,35 +12,65 @@ author: ferricles
 
 
 class Player:
+    """
+    Probably just another data class
+    everything is a data class
+
+    nvm
+    """
 
     #Constructs a player.
-    def __init__(self, name: str, img_path: str = "", team: Team=None, location: GraphNode=None, alive: bool = True, kills: int = 0, deathmsg: str = ""):
+    def __init__(self, name: str, img_path: str = "", team: Team=None, location: GraphNode=None, kills: int = 0, deathmsg: str = ""):
         self.name = name
 
         self.img_path = img_path
+        if location is not None:
+            location.active_players[self.name] = self
         self.location = location
         self.team = team
 
         '''Probably don't touch these'''
-        self.alive = alive
         self.kills = kills
         self.deathmsg = deathmsg #probably shouldn't initialize them dead
 
-    def move(location: GraphNode):
-        self.location = location
+    def move_to(self, new_location: GraphNode):
+        if self.location is not None:
+            del self.location.active_players[self.name]
+        self.location = new_location
+        new_location.active_players[self.name] = self
+        print(f"{self.name} move to {self.location.name}")
 
-    #Kills the player and prints their deathmsg. If a deathmsg is provided, it will print that.
-    def die(self, deathmsg: str = None):
-        if deathmsg is not None:
-            self.deathmsg = deathmsg
-        print(self.deathmsg)
-        self.alive = False
+    def __str__(self):
+        return f"Player(name={self.name},location={self.location.name})"
+
+    def __repr__(self):
+        return self.__str__()
 
 class Team:
     """
     Class representing a team. Probably more of a container than anything meaningful.
     """
-    def __init__(self, name: str, player_list: List[Player]):
+    def __init__(self, team_id: int, name: str=None, player_map: dict=None, location: GraphNode=None):
+        self.id = team_id
         self.name = name
-        self.players = player_list
+        if player_map is None:
+            self.players = dict()
+        else:
+            self.players = player_map
+        if location is not None:
+            location.active_teams[self.id] = self
+        self.location = location
 
+    def get_display_name(self):
+        if self.name is None:
+            return '+'.join(p.name for p in self.player_map.values())
+        return self.name
+
+    def move_to(self, new_location: GraphNode):
+        if self.location is not None:
+            del self.location.active_teams[self.id]
+        self.location = new_location
+        new_location.active_teams[self.id] = self
+
+    def player_count(self):
+        return len(self.players)

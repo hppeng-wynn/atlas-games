@@ -35,7 +35,7 @@
 {0}, {1}, and {2} charge at {3}, but Shaman beam split kills all three.	4	0, 1, 2	[0], [1, 2, 3]	0		0	combat	
 {0} somehow missed the alert that {1}'s tower had aura and pays for it.	2	0	[0], [1]	0		1	combat	
 {0} backdoors the server and bans {1}.	2	1		2		-1	combat	
-{0} /classes while fighting {1} and gets instantly banned	1	0	[0], [1]	0		0	combat	
+{0} /classes while fighting {1} and gets instantly banned	2	0	[0], [1]	0		0	combat	
 {0} plays Amogus Drip too loudly, prompting a nearby {1} and {2} to gang up on them.	3	0	[0]	0	[1, 2]	2	combat	
 {0} couldn't RRR away from {1}'s Serious Series: Serious Punch in time.	2	0	[0], [1]	0		0	combat	
 {0} hacks into the Atlas Games bot and kills {1}.	2	1	[0], [1]	0		-1	combat	
