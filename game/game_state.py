@@ -28,21 +28,21 @@ class Event:
 EVENT_PROBABILITY = {
         "idle": 0.42,
         "accident": 0.03,
-        "combat": 0.25,
-        "bond": 0.2,
-        "team": 0.29,
-        "team-accident": 0.1
+        "combat": 0.05,
+        "bond": 0.3,
+        "team": 0.19,
+        "team-accident": 0.01
     }
 EVENT_NUM_TRIES = 3
 
 MOVE_CHANCE = 0.7
-FOLLOW_TEAM_CHANCE = 0.95
+FOLLOW_TEAM_CHANCE = 0.97
 
 MAX_TEAM_SIZE = 4
 TEAM_CHANGE_CHANCE = 0.3
 
 class GameState:
-    def __init__(self, world_data: dict, player_data: dict, event_data: dict):
+    def __init__(self, world_data: dict, player_data: dict, event_data: dict, output_function=print):
         self._world = World(world_data)
         self._event_data = event_data
         self._teams = []
@@ -51,6 +51,7 @@ class GameState:
         self._turn_counter = 0
         self._event_probability = copy.copy(EVENT_PROBABILITY)
         self._hunt_chance = 0
+        self._print = output_function
 
         teams_by_name = dict()
         for data in sorted(player_data, key = lambda d: d["name"]):
@@ -61,7 +62,7 @@ class GameState:
             if team_name in teams_by_name:
                 player_team = teams_by_name[team_name]
             else:
-                player_team = Team(len(self._teams), team_name)
+                player_team = Team(len(self._teams), None)
                 teams_by_name[team_name] = player_team
                 self._teams.append(player_team)
                     
@@ -69,8 +70,9 @@ class GameState:
             self._players[new_player.name] = new_player
             player_team.players[new_player.name] = new_player
         
-        seed = 542363412#random.randrange(2**31)
-        print(f"Random seed: {seed}")
+        self._players_static = copy.copy(self._players)
+        seed = random.randrange(2**31)
+        self._print(f"Random seed: {seed}")
         self._rng = random.Random(seed)
 
         # Distribute teams
@@ -95,7 +97,7 @@ class GameState:
             result -= prob
         if event_type is None:
             # Unlikely event of floating point error
-            return get_random_event(self)
+            return self.get_random_event()
         return (self._rng.choice(self._event_data[event_type]), event_type)
 
     def try_merge_teams(self, players: List[Player]):
@@ -134,23 +136,25 @@ class GameState:
                 kill_credit[index] = False
             for i, alive in enumerate(kill_credit):
                 if alive:
-                    self._players[players[i]].kills += 1
+                    self._players[players[i]].kills += len(event['deaths'])
 
         #TODO bind to frontend
-        print(event_txt)
+        self._print(event_txt)
 
 
     def turn(self):
-        print(f"Day {self._turn_counter}")
+        self._print(f"Day {self._turn_counter}")
         if self._turn_counter == 3:
             self._event_probability.update({
-                    "idle": 0.32,
-                    "combat": 0.35,
+                    "idle": 0.27,
+                    "combat": 0.30,
+                    "bond": 0.20
                 })
         if self._turn_counter == 10:
             self._event_probability.update({
-                    "idle": 0.12,
-                    "combat": 0.55,
+                    "idle": 0.17,
+                    "combat": 0.50,
+                    "bond": 0.10
                 })
         if self._turn_counter >= 3:
             self._hunt_chance += 0.05
@@ -345,6 +349,17 @@ class GameState:
             return player_select
         return None
 
+    def get_num_alive_players(self):
+        return len(self._players)
+
+    def get_num_dead_players(self):
+        return len(self._dead_players)
+
+    def player_info(self, player_name):
+        if player_name in self._players_static:
+            return self._players_static[player_name].pretty_info()
+        return "No such player!"
+
 if __name__ == "__main__":
     import json
     #world_data = json.load(open("world_simple.json", 'r'))
@@ -355,9 +370,9 @@ if __name__ == "__main__":
     game = GameState(world_data, player_data, event_data)
     while True:
         print(f"Alive: {len(game._players)}, Dead: {len(game._dead_players)}")
-        print("Active teams:")
-        for team in game._teams:
-            if team.player_count() > 0:
-                print(team)
+#         print("Active teams:")
+#         for team in game._teams:
+#             if team.player_count() > 0:
+#                 print(team)
         input()
         game.turn()

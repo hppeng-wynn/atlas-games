@@ -2,6 +2,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread, Lock
 import time
 import asyncio
+import json
 
 import os
 SERVER_PORT = int(os.environ['PORT'])
@@ -10,6 +11,8 @@ import discord
 from discord.ext import tasks
 
 from typing import Union
+
+from game.game_state import GameState
 
 class DiscordBot():
     """
@@ -25,6 +28,11 @@ class DiscordBot():
         self._messages = []
         self._bind_channel = None
         self._running = True
+
+        self._world_data = json.load(open("game/world_data.json", 'r'))
+        self._event_data = json.load(open("game/event_data.json", 'r'))
+        self._player_data = json.load(open("game/players_full.json", 'r'))
+        self._game = None
 
         @self._client.event
         async def on_ready():
@@ -56,6 +64,27 @@ class DiscordBot():
                     self._messages = []
                     self._bind_channel = message.channel
                 await message.channel.send('Bound to '+message.channel.name)
+            elif message.content.startswith('$newgame'):
+                if self._bind_channel is None:
+                    await message.channel.send('atlas-games needs to be bound to a channel first! Use $host')
+                else:
+                    await message.channel.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
+                    self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
+            elif message.content.startswith('$next'):
+                if self._game is None:
+                    await message.channel.send('No game is running! Start a new game with $newgame.')
+                else:
+                    self._game.turn()
+                    self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+            elif message.content.startswith('$player'):
+                if self._game is None:
+                    await message.channel.send('No game is running! Start a new game with $newgame.')
+                else:
+                    try:
+                        player_name = message.content.split(' ', 1)[1]
+                        await message.channel.send(self._game.player_info(player_name))
+                    except:
+                        await message.channel.send("`$player <playername>`")
 
         @self._client.event
         async def on_reaction_add(reaction: discord.Reaction,
@@ -73,8 +102,15 @@ class DiscordBot():
             """
             if self._bind_channel is not None:
                 with self._message_lock:
+                    buffered_message = ""
                     for text in self._messages:
-                        await self._bind_channel.send(text)
+                        if len(buffered_message) + len(text) < 1000:
+                            buffered_message += "\n" + text
+                        else:
+                            await self._bind_channel.send(buffered_message)
+                            buffered_message = text
+                    if len(buffered_message) > 0:
+                        await self._bind_channel.send(buffered_message)
                     self._messages = []
 
     def queue_message(self, text: str) -> bool:

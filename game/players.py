@@ -31,6 +31,7 @@ class Player:
 
         '''Probably don't touch these'''
         self.kills = kills
+        self.alive = True
         self.deathmsg = deathmsg #probably shouldn't initialize them dead
         self._active = True
 
@@ -40,6 +41,13 @@ class Player:
         self.location = new_location
         new_location.active_players[self.name] = self
         #print(f"{self.name} move to {self.location.name}")
+
+    def pretty_info(self):
+        retval = f"Player name={self.name} [{self.team.get_display_name()}]:\nKills: {self.kills}\nLocation: {self.location.name}\nAlive: {self.alive}"
+        if self.alive:
+            return retval
+        else:
+            return retval + f"\nDeath: [{self.deathmsg}]"
 
     def __str__(self):
         return f"Player(name={self.name},location={self.location.name})"
@@ -55,6 +63,8 @@ class Player:
     def remove(self):
         del self.team.players[self.name]
         del self.location.active_players[self.name]
+        self.team = Team(-1)
+        self.alive = False
         
 class Team:
     """
