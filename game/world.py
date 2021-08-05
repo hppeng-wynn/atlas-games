@@ -51,6 +51,23 @@ class World:
 
         return retval
 
+    def path_to(self, node: GraphNode, filter_func = lambda node: True):
+        q = SimpleQueue()
+        q.put((node, []))
+        visited = set()
+        while not q.empty():
+            cur, path = q.get()
+            if filter_func(cur):
+                return path
+            if cur.id in visited:
+                continue
+            visited.add(cur.id)
+            for neighbor in cur.edges:
+                neighbor_node = self.node(neighbor)
+                q.put((neighbor_node, path+[neighbor_node]))
+
+        return None
+
 class GraphNode:
     def __init__(self, node_id: int, name: str, edges: List[int], graph: World):
         self._graph = graph

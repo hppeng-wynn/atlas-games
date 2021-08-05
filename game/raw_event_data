@@ -30,6 +30,8 @@ Oops, the server spiked! {0} is now dead.	1	0		1		0	accident
 {0} decides to hold up a trident during a thunderstorm and is struck by lightning. RIP	1	0		1		0	accident	
 {0} was blown up by Creeper.	1	0		1		0	accident	
 {0} gets run over by a llama. Or was that an alpaca?	1	0		1		0	accident	
+{0} gets killed by Lari. Owned.	1	0		1		0	accident	Light Forest
+{0} falls into the lava while on a lootrun.	1	0		1		0	accident	Molten Heights
 {0} and {1} bond over some Gargalon Gravy.	2			2		0	bond	
 {0} and {1} pet some wild wybels.	2			2		0	bond	
 {0} uwus at {1}.	2			2		0	bond	
@@ -46,7 +48,7 @@ Oops, the server spiked! {0} is now dead.	1	0		1		0	accident
 {0} catches {1} using flipped lapis and acts accordingly.	2	1		2		0	combat	
 {0} and {1} argue over a galleon rework to the point of starvation.	2	0, 1		2		0	combat	
 {0} 1984's {1} out of existence.	2	1	[0], [1]	0		0	combat	
-{0} gets killed the crossfire between {1} and {2}, but has 100% thorns and reflection.	3	0, 1, 2	[0], [1]	1		0	combat	
+{0} gets killed the crossfire between {1} and {2}, but has 100% thorns and reflection.	3	0, 1, 2	[1], [2]	1		0	combat	
 {0} one-taps {1} using their heavy melee build.	2	1	[0], [1]	0		0	combat	
 {0} teaches {1} that defense doesn't work so well in pvp.	2	1	[0], [1]	0		0	combat	
 {0} tries stabbing {1}, but {0}'s agility allows them to dodge the attack, and they retreat.	2		[0], [1]	0		0	combat	
@@ -59,7 +61,7 @@ Oops, the server spiked! {0} is now dead.	1	0		1		0	accident
 {0} summons a meteor onto {1} and {2}, killing both of them instantly.	3	1, 2	[0]	0	[1, 2]	0	combat	
 {0} teams up with Dr. Herbert von Legendary to take down {1}.	2	1	[0], [1]	1		0	combat	Corkus
 {0} kills {1} while they are afk.	2	1	[0], [1]	0		1	combat	
-{0} shows up to fight {1} and {2} in a Sans build. {1} and {2} have heart attacks.	2	1, 2	[0]	0	[1, 2]	0	combat	
+{0} shows up to fight {1} and {2} in a Sans build. {1} and {2} have heart attacks.	3	1, 2	[0]	0	[1, 2]	0	combat	
 {0} impales {1}.	2	1	[0], [1]	0		0	combat	
 {0} beats {1} in a fist duel.	2	1	[0], [1]	0		0	combat	
 {0} uncorks a vicious deez nuts joke, obliterating {1}.	2	1		2		0	combat	
@@ -110,7 +112,6 @@ Oops, the server spiked! {0} is now dead.	1	0		1		0	accident
 {0} catches food poisoning after eating raw fish.	1			1		0	idle	
 {0} watches Iboju review an item, then realizes they can't afford it.	1			1		0	idle	
 {0} pokes the Eye.	1			1		0	idle	SE-2
-{0} gets killed by Lari. Owned.	1	0		1		0	idle	
 {0} creates a guild.	1			1		0	idle	
 {0} throws prof bombs.	1			1		0	idle	
 {0} is stuck in the tutorial.	1			1		0	idle	Ragni
@@ -123,7 +124,6 @@ Oops, the server spiked! {0} is now dead.	1	0		1		0	accident
 {0} buys another combat dummy.	1			1		0	idle	
 {0} pings {1} in #discord-link.	2			2		-1	idle	
 {0} trolls {1} using Ignis with -hpr.	2			2		0	idle	
-{0} falls into the lava while on a lootrun.	1	0		1		0	idle	Molten Heights
 {0} realizes the Anima bug on wb is still not fixed.	1			1		0	idle	
 {0} runs from kantyr.	1			1		0	idle	SE-1
 {0} tries to snipe best gummy from {1}. {2} snipes it first.	3			3		-1	idle	

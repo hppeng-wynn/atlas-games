@@ -70,6 +70,7 @@ class Team:
         if location is not None:
             location.active_teams[self.id] = self
         self.location = location
+        self.hunt = 0
 
     def get_display_name(self):
         if self.name is None:

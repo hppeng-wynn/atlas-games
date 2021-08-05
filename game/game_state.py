@@ -8,6 +8,7 @@ if __name__ == "__main__":
 
 from typing import List
 import random
+import copy
 
 from game.world import World
 from game.players import Player, Team
@@ -25,12 +26,12 @@ class Event:
 """
 
 EVENT_PROBABILITY = {
-        "idle": 0.3,
-        "accident": 0.05,
-        "combat": 0.3,
+        "idle": 0.42,
+        "accident": 0.03,
+        "combat": 0.25,
         "bond": 0.2,
-        "team": 0.2,
-        "team-accident": 0.2
+        "team": 0.29,
+        "team-accident": 0.1
     }
 EVENT_NUM_TRIES = 3
 
@@ -47,6 +48,9 @@ class GameState:
         self._teams = []
         self._players = dict()
         self._dead_players = []
+        self._turn_counter = 0
+        self._event_probability = copy.copy(EVENT_PROBABILITY)
+        self._hunt_chance = 0
 
         teams_by_name = dict()
         for data in sorted(player_data, key = lambda d: d["name"]):
@@ -65,7 +69,7 @@ class GameState:
             self._players[new_player.name] = new_player
             player_team.players[new_player.name] = new_player
         
-        seed = 0# random.randrange(2**31)
+        seed = 542363412#random.randrange(2**31)
         print(f"Random seed: {seed}")
         self._rng = random.Random(seed)
 
@@ -84,7 +88,7 @@ class GameState:
         """
         result = self._rng.random()
         event_type = None
-        for etype, prob in EVENT_PROBABILITY.items():
+        for etype, prob in self._event_probability.items():
             if result < prob:
                 event_type = etype
                 break
@@ -137,8 +141,53 @@ class GameState:
 
 
     def turn(self):
+        print(f"Day {self._turn_counter}")
+        if self._turn_counter == 3:
+            self._event_probability.update({
+                    "idle": 0.32,
+                    "combat": 0.35,
+                })
+        if self._turn_counter == 10:
+            self._event_probability.update({
+                    "idle": 0.12,
+                    "combat": 0.55,
+                })
+        if self._turn_counter >= 3:
+            self._hunt_chance += 0.05
+        self._turn_counter += 1
+
+        event_list = []
+
+        hunting_players = set()
         for team in self._teams:
             if len(team.players) > 0:
+                if team.hunt == 0 and self._rng.random() < self._hunt_chance:
+                    team.hunt += int(5*max(1, self._hunt_chance))
+                    hunting_players.update(team.players.keys())
+                    player_names = sorted(team.players.keys())
+                    if len(team.players) == 1:
+                        event_text = "{0} hunts for other tributes..."
+                    elif len(team.players) == 2:
+                        event_text = "{0} and {1} hunt for other tributes."
+                    else:
+                        event_text = "{"+"}, {".join(str(x) for x in range(len(player_names) - 1))+"}, and {"+str(len(player_names) - 1)+"} hunt for other tributes."
+                    event_list.append(({
+                            'text': event_text, 
+                            'deaths': []
+                        }, 'hunt', player_names))
+                    continue;
+                if team.hunt > 0:
+                    def has_enemy(node):
+                        for player in node.active_players.values():
+                            if player.team.id != team.id:
+                                return True
+                        return False
+                    hunt_path = self._world.path_to(team.location, has_enemy)
+                    if hunt_path is not None and len(hunt_path) > 0:
+                        move_to = hunt_path[0]
+                        team.move_to(move_to)
+                        team.hunt -= 1
+                        continue
                 if self._rng.random() < MOVE_CHANCE:
                     move_to = team.location.random_neighbor(self._rng)
                     team.move_to(move_to)
@@ -153,8 +202,7 @@ class GameState:
                 player.team = solo_team
                 self._teams.append(solo_team)
 
-        players_need_event = sorted(list(self._players.keys()))
-        event_list = []
+        players_need_event = sorted(filter(lambda k: k not in hunting_players, self._players.keys()))
         while len(players_need_event):
             event, event_type = self.get_random_event()
             player_set = self.fit_event(event, set(players_need_event))
@@ -261,7 +309,10 @@ class GameState:
                         break
                     select_set = (p.name for p in self._rng.sample(remaining_players, len(player_set)))
                     for player_name, spot in zip(select_set, player_set):
-                        player_select[spot] = player_name
+                        try:
+                            player_select[spot] = player_name
+                        except:
+                            print(event)
                         i -= 1
                     remaining_players = list(filter(lambda p: p.name not in select_set, remaining_players))
                     complement_filled += 1
