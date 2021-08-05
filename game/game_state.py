@@ -26,14 +26,19 @@ class Event:
 
 EVENT_PROBABILITY = {
         "idle": 0.3,
+        "accident": 0.05,
         "combat": 0.3,
         "bond": 0.2,
-        "team": 0.2
+        "team": 0.2,
+        "team-accident": 0.2
     }
 EVENT_NUM_TRIES = 3
 
 MOVE_CHANCE = 0.7
 FOLLOW_TEAM_CHANCE = 0.95
+
+MAX_TEAM_SIZE = 4
+TEAM_CHANGE_CHANCE = 0.3
 
 class GameState:
     def __init__(self, world_data: dict, player_data: dict, event_data: dict):
@@ -44,7 +49,7 @@ class GameState:
         self._dead_players = []
 
         teams_by_name = dict()
-        for data in player_data:
+        for data in sorted(player_data, key = lambda d: d["name"]):
             if "team" in data:
                 team_name = data["team"]
             else:
@@ -87,46 +92,83 @@ class GameState:
         if event_type is None:
             # Unlikely event of floating point error
             return get_random_event(self)
-        return self._rng.choice(self._event_data[event_type])
+        return (self._rng.choice(self._event_data[event_type]), event_type)
 
-    def process_event(self, event, players):
+    def try_merge_teams(self, players: List[Player]):
+        team_pool = sorted([self._teams[i] for i in set(p.team.id for p in players)], key=lambda t: (t.player_count(), -t.id))
+        while len(team_pool) > 1:
+            if team_pool[-1].player_count() == MAX_TEAM_SIZE:
+                team_pool.pop(-1)
+                continue
+            if team_pool[0].player_count() + team_pool[1].player_count() < MAX_TEAM_SIZE:
+                team_pool[0].merge_into(team_pool[1])
+                team_pool.pop(0)
+                team_pool.append(team_pool.pop(0))
+                team_pool.sort(key=lambda t: (t.player_count(), -t.id))
+                continue
+            smallest = team_pool.pop(0)
+            for player in self._rng.sample(players, len(players)):
+                if player.name in smallest.players:
+                    if self._rng.random() < TEAM_CHANGE_CHANCE:
+                        player.move_teams(team_pool[0])
+                        team_pool.sort(key=lambda t: (t.player_count(), -t.id))
+                        break
+
+    def process_event(self, event, event_type, players: List[str]):
+        if event_type == 'bond':
+            self.try_merge_teams([self._players[n] for n in players])
+        
+        event_txt = event['text'].format(*players)
+        if len(event['deaths']) > 0:
+            kill_credit = [True] * len(players)
+            for index in event['deaths']:
+                killed_player = self._players[players[index]]
+                killed_player.deathmsg = event_txt
+                killed_player.remove()
+                del self._players[players[index]]
+                self._dead_players.append(killed_player)
+                kill_credit[index] = False
+            for i, alive in enumerate(kill_credit):
+                if alive:
+                    self._players[players[i]].kills += 1
+
         #TODO bind to frontend
-        print(event['text'].format(*players))
+        print(event_txt)
 
 
     def turn(self):
         for team in self._teams:
-            if self._rng.random() < MOVE_CHANCE:
-                move_to = team.location.random_neighbor(self._rng)
-                team.move_to(move_to)
-        for player in self._players.values():
+            if len(team.players) > 0:
+                if self._rng.random() < MOVE_CHANCE:
+                    move_to = team.location.random_neighbor(self._rng)
+                    team.move_to(move_to)
+        for player in sorted(self._players.values(), key=lambda p: p.name):
             if self._rng.random() < FOLLOW_TEAM_CHANCE:
                 player.move_to(player.team.location)
             else:
                 player.move_to(player.location.random_neighbor(self._rng))
                 del player.team.players[player.name]
                 solo_team = Team(len(self._teams), None, {player.name: player}, player.location)
+                player.location.active_teams[solo_team.id] = solo_team
                 player.team = solo_team
                 self._teams.append(solo_team)
 
         players_need_event = sorted(list(self._players.keys()))
+        event_list = []
         while len(players_need_event):
-            event = self.get_random_event()
+            event, event_type = self.get_random_event()
             player_set = self.fit_event(event, set(players_need_event))
             if player_set is not None:
-                self.process_event(event, player_set)
+                event_list.append((event, event_type, player_set))
+                for player in (self._players[n] for n in player_set):
+                    player._active = False
                 players_need_event = list(filter(lambda name: name not in player_set, players_need_event))
-    """
-    class Event:
-        Properties:
-        - text: event format text
-        - num_players: number of players
-        - deaths: list of dying player indices
-        - team_list: list of indices that have to match
-        - complement_list: list of indices that have to complement those in team_list
-        - radius: event radius
-        - location: Specific location
-    """
+
+        for event, event_type, player_set in event_list:
+            self.process_event(event, event_type, player_set)
+
+        for player in self._players.values():
+            player._active = True
 
     def fit_event(self, event, remaining_player_set):
         # Select starting player
@@ -139,20 +181,21 @@ class GameState:
             _localized = True
             player_pool = self._world.players_near(target_location, event['radius'],
                         filter_func = lambda p: p.name in remaining_player_set)
-            team_pool = sorted([self._teams[i] for i in set(p.team.id for p in player_pool)], key=lambda t: t.id)
+            team_pool = sorted([self._teams[i] for i in set(p.team.id for p in player_pool)],
+                                    key=lambda t: (t.active_player_count(), t.id), reverse=True)
         else:
             _localized = event['radius'] == -1
-            player_pool = [self._players[p_id] for p_id in remaining_player_set]
-            team_pool = sorted(list(self._teams), key=lambda t: t.id) # Copy
+            player_pool = sorted([self._players[p_id] for p_id in remaining_player_set], key=lambda p: p.name)
+            team_pool = sorted([self._teams[i] for i in set(p.team.id for p in player_pool)],
+                                    key=lambda t: (t.active_player_count(), t.id), reverse=True)
 
         if len(player_pool) < event['num_players']:
             return None
-        team_pool.sort(key=lambda team: team.player_count(), reverse=True)
 
         def pick_team(team_pool, teams_select, nplayer_min):
             index_last = 0
             while index_last < len(team_pool):
-                if team_pool[index_last].player_count() < nplayer_min:
+                if team_pool[index_last].active_player_count() < nplayer_min:
                     break
                 index_last += 1
             if index_last == 0:
@@ -184,7 +227,7 @@ class GameState:
                     remaining_players = self._world.players_near(source_team.location, event['radius'],
                             filter_func = lambda p: p.name in remaining_player_set)
                     remaining_team_pool = sorted([self._teams[i] for i in set(p.team.id for p in remaining_players)], 
-                                                    key=lambda t: t.id)
+                                                    key=lambda t: (t.active_player_count(), t.id))
                 else:
                     team_idx = 0
                     remaining_team_pool = team_pool
@@ -199,10 +242,10 @@ class GameState:
                 if len(teams_select) != len(event['team_list']):
                     continue
                 for team_id, targets in zip(teams_select, event['team_list']):
-                    team_players = self._rng.sample(sorted(list(self._teams[team_id].players.keys())), len(targets))
-                    for player_name, spot in zip(team_players, targets):
+                    team_players = self._rng.sample(self._teams[team_id].active_players(), len(targets))
+                    for player, spot in zip(team_players, targets):
                         try:
-                            player_select[spot] = player_name
+                            player_select[spot] = player.name
                         except Exception as e:
                             print(event)
                             raise e
@@ -259,7 +302,11 @@ if __name__ == "__main__":
     #player_data = json.load(open("players_simple.json", 'r'))
     player_data = json.load(open("players_full.json", 'r'))
     game = GameState(world_data, player_data, event_data)
-    print(game._players)
-    game.turn()
-    print(game._players)
-    game.turn()
+    while True:
+        print(f"Alive: {len(game._players)}, Dead: {len(game._dead_players)}")
+        print("Active teams:")
+        for team in game._teams:
+            if team.player_count() > 0:
+                print(team)
+        input()
+        game.turn()

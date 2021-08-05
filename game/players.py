@@ -32,13 +32,14 @@ class Player:
         '''Probably don't touch these'''
         self.kills = kills
         self.deathmsg = deathmsg #probably shouldn't initialize them dead
+        self._active = True
 
     def move_to(self, new_location: GraphNode):
         if self.location is not None:
             del self.location.active_players[self.name]
         self.location = new_location
         new_location.active_players[self.name] = self
-        print(f"{self.name} move to {self.location.name}")
+        #print(f"{self.name} move to {self.location.name}")
 
     def __str__(self):
         return f"Player(name={self.name},location={self.location.name})"
@@ -46,6 +47,15 @@ class Player:
     def __repr__(self):
         return self.__str__()
 
+    def move_teams(self, new_team: Team):
+        del self.team.players[self.name]
+        new_team.players[self.name] = self
+        self.team = new_team
+
+    def remove(self):
+        del self.team.players[self.name]
+        del self.location.active_players[self.name]
+        
 class Team:
     """
     Class representing a team. Probably more of a container than anything meaningful.
@@ -63,7 +73,7 @@ class Team:
 
     def get_display_name(self):
         if self.name is None:
-            return '+'.join(p.name for p in self.player_map.values())
+            return '+'.join(p.name for p in self.players.values())
         return self.name
 
     def move_to(self, new_location: GraphNode):
@@ -74,3 +84,23 @@ class Team:
 
     def player_count(self):
         return len(self.players)
+
+    def active_player_count(self):
+        return sum(p._active for p in self.players.values())
+
+    def active_players(self):
+        return [p for p in self.players.values() if p._active]
+
+    def merge_into(self, parent_team):
+        parent_team.players.update(self.players)
+        for player in self.players.values():
+            player.team = parent_team
+        if self.location is not None:
+            del self.location.active_teams[self.id]
+        self.players = dict()
+
+    def __str__(self):
+        return f"Team(display_name={self.get_display_name()},location={self.location.name},size={self.player_count()},id={self.id},players=[{','.join(p.name for p in self.players.values())}])"
+
+    def __repr__(self):
+        return self.__str__()

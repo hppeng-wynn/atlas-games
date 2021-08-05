@@ -43,7 +43,7 @@ class World:
             cur, dist = q.get()
             if cur.id in visited:
                 continue
-            retval += list(filter(filter_func, cur.active_players.values()))
+            retval += list(filter(filter_func, sorted(cur.active_players.values(), key=lambda p: p.name)))
             visited.add(cur.id)
             if dist < distance:
                 for neighbor in cur.edges:
@@ -60,5 +60,5 @@ class GraphNode:
         self.active_players = dict()
         self.active_teams = dict()
 
-    def random_neighbor(self, random):
-        return self._graph.node(random.choice(self.edges))
+    def random_neighbor(self, rand):
+        return self._graph.node(rand.choice(self.edges))
