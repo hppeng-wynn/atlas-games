@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread, Lock
 import time
@@ -70,6 +72,10 @@ class DiscordBot():
                 else:
                     await message.channel.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
+
+                    def player_highlighter(this: GameState, event: Event, players: List[str]):
+                        return event['text'].format(*(f"__**{p}**__" for p in players))
+                    self._game.set_event_formatter(player_highlighter)
             elif message.content.startswith('$next'):
                 if self._game is None:
                     await message.channel.send('No game is running! Start a new game with $newgame.')

@@ -52,6 +52,7 @@ class GameState:
         self._event_probability = copy.copy(EVENT_PROBABILITY)
         self._hunt_chance = 0
         self._print = output_function
+        self._event_formatter = lambda this, event, players: event['text'].format(*players)
 
         teams_by_name = dict()
         for data in sorted(player_data, key = lambda d: d["name"]):
@@ -83,6 +84,17 @@ class GameState:
             team.move_to(start_point)
             for player in team.players.values():
                 player.move_to(start_point)
+
+    def set_event_formatter(self, formatter_func):
+        """
+        Set the "event string formatter".
+
+        Should take 3 args:
+            - 0: 'this' (to access player/map data structure)
+            - 1: event (event dict, no type info..)
+            - 2: player list (names only)
+        """
+        self._event_formatter = formatter_func
 
     def get_random_event(self):
         """
@@ -123,13 +135,13 @@ class GameState:
     def process_event(self, event, event_type, players: List[str]):
         if event_type == 'bond':
             self.try_merge_teams([self._players[n] for n in players])
-        
-        event_txt = event['text'].format(*players)
+
+        event_text = self._event_formatter(self, event, players)
         if len(event['deaths']) > 0:
             kill_credit = [True] * len(players)
             for index in event['deaths']:
                 killed_player = self._players[players[index]]
-                killed_player.deathmsg = event_txt
+                killed_player.deathmsg = event_text
                 killed_player.remove()
                 del self._players[players[index]]
                 self._dead_players.append(killed_player)
@@ -139,7 +151,7 @@ class GameState:
                     self._players[players[i]].kills += len(event['deaths'])
 
         #TODO bind to frontend
-        self._print(event_txt)
+        self._print(event_text)
 
 
     def turn(self):
