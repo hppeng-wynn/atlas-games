@@ -62,8 +62,8 @@ class DiscordBot():
                 try:
                     port = message.content.split(' ', 1)[1]
                     if port == SERVER_PORT:
-                        self.pause()
                         await message.channel.send(f"Disconnecting bot running on port {port}")
+                        self.pause()
                 except:
                     await message.channel.send("`$dc PORT`")
             elif message.content.startswith('$host'):
@@ -210,7 +210,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
         else:
             # IS THIS SECURE? TODO
-            for suffix in [".html", ".js", ".css"]:
+            for suffix in [".html", ".js", ".css", ".txt"]:
                 if path.endswith(suffix):
                     return super().do_GET()
             self.send_error(403)
