@@ -49,10 +49,6 @@ class DiscordBot():
         async def on_message(message: discord.Message):
             """
             Callback triggered when a message is sent in a channel viewable by this bot.
-
-            Behavior for now:
-            - $hello: ping (sends "Hello!" message)
-            - $host:  bind bot to current channel
             """
             if not self._running:
                 return
@@ -62,6 +58,14 @@ class DiscordBot():
 
             if message.content.startswith('$hello'):
                 await message.channel.send(f"Hello! I'm on port {SERVER_PORT}")
+            if message.content.startswith('$dc'):
+                try:
+                    port = message.content.split(' ', 1)[1]
+                    if port == SERVER_PORT:
+                        self.pause()
+                        await message.channel.send(f"Disconnecting bot running on port {port}")
+                except:
+                    await message.channel.send("`$dc PORT`")
             elif message.content.startswith('$host'):
                 with self._message_lock:
                     self._messages = []
@@ -93,7 +97,16 @@ class DiscordBot():
                     except:
                         await message.channel.send("`$player <playername>`")
             elif message.content.startswith('$help'):
-                await message.channel.send(f'{ATLAS} **Welcome to atlas games!** {ATLAS} \nhere are a few helpful commands: ```ARM\n$hello -- pings the bot, returns the current hosting port \n$host -- binds the bot to the current channel \n$newgame -- only after the bot is bound, starts a new round of atlas games \n$next -- starts the next day given that a game is already running \n$player <playername> -- returns the statistics of a player\n```')
+                await message.channel.send(
+f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
+here are a few helpful commands: ```ARM
+$hello -- pings the bot, returns the current hosting port (debug use)
+$dc <port> -- disconnect the bot running on the specified port (debug use)
+$host -- binds the bot to the current channel
+$newgame -- only after the bot is bound, starts a new round of atlas games
+$next -- starts the next day given that a game is already running
+$player <playername> -- returns the statistics of a player
+```''')
 
         @self._client.event
         async def on_reaction_add(reaction: discord.Reaction,
