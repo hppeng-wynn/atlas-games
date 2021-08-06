@@ -1,22 +1,19 @@
 # Type annotations without import
 from __future__ import annotations
 from typing import List
+
+from game.game_constants import MAX_TEAM_SIZE, TEAM_CHANGE_CHANCE
+
 '''
 Represents a player. 
 author: ferricles
 '''
 
-'''
- * change the location field's graphNode type is correct
-'''
-
-
 class Player:
     """
-    Probably just another data class
-    everything is a data class
-
-    nvm
+    Class representing a player.
+    Holds info like name, id, kills, aliveness, etc
+    Also more dynamic stuff like team/location
     """
 
     #Constructs a player.
@@ -115,3 +112,47 @@ class Team:
 
     def __repr__(self):
         return self.__str__()
+
+def try_merge_teams(players: List[Player], random: Random):
+    """
+    Try to merge the teams of this subset of players.
+    In order:
+    1) Smallest teams will try to merge.
+    2) Player from smallest team will try to move to second smallest team.
+    """
+
+    # Collect unique teams among the players, sort by size in ascending order.
+    team_ids = set()
+    team_pool = []
+    for p in players:
+        if p.team.id not in team_ids:
+            team_ids.add(p.team.id)
+            team_pool.append(p.team)
+    team_pool.sort(key=lambda t: (t.player_count(), -t.id))
+
+    while len(team_pool) > 1:
+        # If the team is full remove it.
+        if team_pool[-1].player_count() == MAX_TEAM_SIZE:
+            team_pool.pop(-1)
+            continue
+        # From this point on no teams are full.
+
+        # Case 1: Smallest two teams can merge.
+        # Do it. Resort list and continue
+        if team_pool[0].player_count() + team_pool[1].player_count() < MAX_TEAM_SIZE:
+            team_pool[0].merge_into(team_pool[1])
+            team_pool.pop(0)
+            team_pool.append(team_pool.pop(0))
+            team_pool.sort(key=lambda t: (t.player_count(), -t.id))
+            continue
+
+        # Case 2: Smallest two teams can't merge (over team size cap).
+        # Remove smallest team from pool. Optionally a player from the smallest
+        # team merges into the second smallest team.
+        smallest = team_pool.pop(0)
+        for player in random.sample(players, len(players)):
+            if player.name in smallest.players:
+                if random.random() < TEAM_CHANGE_CHANCE:
+                    player.move_teams(team_pool[0])
+                    team_pool.sort(key=lambda t: (t.player_count(), -t.id))
+                    break
