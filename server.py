@@ -1,4 +1,5 @@
 from __future__ import annotations
+from emojis import ATLAS
 
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread, Lock
@@ -92,8 +93,7 @@ class DiscordBot():
                     except:
                         await message.channel.send("`$player <playername>`")
             elif message.content.startswith('$help'):
-                atlas_emoji = '<:atlas:663105358944010241>'
-                await message.channel.send(f'{atlas_emoji} **Welcome to atlas games!** {atlas_emoji} \nhere are a few helpful commands: ```ARM\n$hello -- pings the bot, returns the current hosting port \n$host -- binds the bot to the current channel \n$newgame -- only after the bot is bound, starts a new round of atlas games \n$next -- starts the next day given that a game is already running \n$player <playername> -- returns the statistics of a player\n```')
+                await message.channel.send(f'{ATLAS} **Welcome to atlas games!** {ATLAS} \nhere are a few helpful commands: ```ARM\n$hello -- pings the bot, returns the current hosting port \n$host -- binds the bot to the current channel \n$newgame -- only after the bot is bound, starts a new round of atlas games \n$next -- starts the next day given that a game is already running \n$player <playername> -- returns the statistics of a player\n```')
 
         @self._client.event
         async def on_reaction_add(reaction: discord.Reaction,

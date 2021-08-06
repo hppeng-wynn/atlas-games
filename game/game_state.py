@@ -10,6 +10,7 @@ from typing import List
 import random
 import copy
 
+from emojis import ATLOSS
 from game.world import World
 from game.players import Player, Team
 
@@ -132,7 +133,7 @@ class GameState:
                         team_pool.sort(key=lambda t: (t.player_count(), -t.id))
                         break
 
-    def process_event(self, event, event_type, players: List[str]):
+    def process_event(self, event, event_type, players: List[str], killed_players: List[Player]):
         if event_type == 'bond':
             self.try_merge_teams([self._players[n] for n in players])
 
@@ -144,6 +145,7 @@ class GameState:
                 killed_player.deathmsg = event_text
                 killed_player.remove()
                 del self._players[players[index]]
+                killed_players.append(killed_player)
                 self._dead_players.append(killed_player)
                 kill_credit[index] = False
             for i, alive in enumerate(kill_credit):
@@ -228,9 +230,14 @@ class GameState:
                     player._active = False
                 players_need_event = list(filter(lambda name: name not in player_set, players_need_event))
 
+        killed_players = []
         for event, event_type, player_set in event_list:
-            self.process_event(event, event_type, player_set)
+            self.process_event(event, event_type, player_set, killed_players)
 
+        self._print("")
+        self._print(f"{len(killed_players)} cannon shots can be heard in the distance.")
+        for player in killed_players:
+            self._print(f"{ATLOSS} {player.name}")
         for player in self._players.values():
             player._active = True
 
