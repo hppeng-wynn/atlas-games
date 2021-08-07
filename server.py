@@ -57,13 +57,15 @@ class DiscordBot():
 
             if message.author == self._client.user:
                 return
+            print(f"Message recv: {message.content}")
 
             if message.content.startswith('$hello'):
                 await message.channel.send(f"Hello! I'm on port {SERVER_PORT}")
             if message.content.startswith('$dc'):
                 try:
-                    port = message.content.split(' ', 1)[1]
+                    port = int(message.content.split(' ', 1)[1].strip())
                     if port == SERVER_PORT:
+                        print(f"Disconnecting bot running on port {port}")
                         await message.channel.send(f"Disconnecting bot running on port {port}")
                         self.pause()
                 except:
