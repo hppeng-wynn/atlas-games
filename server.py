@@ -135,6 +135,8 @@ $player <playername> -- returns the statistics of a player
             For now: Reads messages out of the message queue (can be filled by other threads)
             and spits them out into the bound channel.
             """
+            if not self._running:
+                return
             if self._bind_channel is not None:
                 with self._message_lock:
                     buffered_message = ""
