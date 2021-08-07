@@ -51,7 +51,7 @@ class GameState:
         self._event_probability = copy.copy(EVENT_PROBABILITY)      # Probability for each event. Changes over time
         self._hunt_chance = 0                           # Chance (0-1) that a team will decide to go hunting.
         self._print = output_function
-        self._event_formatter = lambda this, event, players: event['text'].format(*(p.name for p in players))
+        self._event_printer = lambda this, event, players: print(event['text'].format(*(p.name for p in players)))
 
         # Initialize players and teams.
         # Players always are on a team (if they are solo they are on their own team).
@@ -93,16 +93,16 @@ class GameState:
             for player in team.players.values():
                 player.move_to(start_point)
 
-    def set_event_formatter(self, formatter_func):
+    def set_event_printer(self, print_func):
         """
-        Set the "event string formatter".
+        Set the "event printer".
 
         Should take 3 args:
             - 0: 'this' (to access player/map data structure)
             - 1: event (event dict, no type info..)
             - 2: player list (player objects!)
         """
-        self._event_formatter = formatter_func
+        self._event_printer = print_func
 
     def get_random_event(self):
         """
@@ -138,7 +138,7 @@ class GameState:
         if event_type == 'bond':
             try_merge_teams(players, self._rng)
 
-        event_text = self._event_formatter(self, event, players)
+        event_text = event['text'].format(*(p.name for p in players))
         killed_players = []
         if len(event['deaths']) > 0:
             kill_credit = [True] * len(players)
@@ -155,7 +155,7 @@ class GameState:
                     players[i].kills += len(event['deaths'])
 
         #TODO bind to frontend properly
-        self._print(event_text)
+        self._event_printer(self, event, players)
         return killed_players
 
 

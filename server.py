@@ -79,8 +79,9 @@ class DiscordBot():
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event: Event, players: List[Player]):
-                        return event['text'].format(*(f"__**{p.name}**__" for p in players))
-                    self._game.set_event_formatter(player_highlighter)
+                        self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+
+                    self._game.set_event_printer(player_highlighter)
             elif message.content.startswith('$next'):
                 if self._game is None:
                     await message.channel.send('No game is running! Start a new game with $newgame.')
