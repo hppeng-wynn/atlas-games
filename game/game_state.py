@@ -264,7 +264,6 @@ class GameState:
         for event, event_type, player_set in event_list:
             killed_players += self.process_event(event, event_type, player_set)
 
-        self._print("")
         self._print(f"{len(killed_players)} cannon shots can be heard in the distance.")
         for player in killed_players:
             self._print(f"{ATLOSS} {player.name}")

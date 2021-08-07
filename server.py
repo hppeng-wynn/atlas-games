@@ -81,8 +81,6 @@ class DiscordBot():
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event: Event, players: List[Player]):
-                        self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
-
                         imagelist = [p.get_active_image() for p in players]
                         image_size = 128
 
@@ -91,7 +89,7 @@ class DiscordBot():
                         for i in range(len(imagelist)):
                             result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4))
                         self.queue_message(result)
-                        
+                        self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
 
                     self._game.set_event_printer(player_highlighter)
             elif message.content.startswith('$next'):
@@ -163,6 +161,7 @@ $player <playername> -- returns the statistics of a player
 
         with self._message_lock:
             self._messages.append(content)
+        print("Queued message successfully " + str(content))
         return True
 
     def start(self):
