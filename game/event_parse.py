@@ -1,7 +1,6 @@
 import sys
 import json
 import os
-from ast import literal_eval
 
 #Event Text|NumPlayers|Death List|TeamList|Solo|Complement|Radius|type|Special Location Req
 #   0           1           2       3       4       5        6      7           8
