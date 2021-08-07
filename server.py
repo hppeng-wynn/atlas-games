@@ -6,6 +6,8 @@ from threading import Thread, Lock
 import time
 import asyncio
 import json
+from io import BytesIO
+from PIL import Image
 
 import os
 SERVER_PORT = int(os.environ['PORT'])
@@ -81,6 +83,16 @@ class DiscordBot():
                     def player_highlighter(this: GameState, event: Event, players: List[Player]):
                         self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
 
+                        imagelist = [p.get_active_image() for p in players]
+                        image_size = 128
+
+                        result_width = image_size * len(imagelist)
+                        result = Image.new(mode='RGB', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1.5)), color=(54, 57, 63))
+                        for i in range(len(imagelist)):
+                            result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4))
+                        self.queue_message(result)
+                        
+
                     self._game.set_event_printer(player_highlighter)
             elif message.content.startswith('$next'):
                 if self._game is None:
@@ -126,17 +138,19 @@ $player <playername> -- returns the statistics of a player
             if self._bind_channel is not None:
                 with self._message_lock:
                     buffered_message = ""
-                    for text in self._messages:
-                        if len(buffered_message) + len(text) < 1000:
-                            buffered_message += "\n" + text
-                        else:
-                            await self._bind_channel.send(buffered_message)
-                            buffered_message = text
+                    for content in self._messages:
+                        if isinstance(content, str):
+                            await self._bind_channel.send(content)
+                        elif isinstance(content, Image.Image):
+                            with BytesIO() as image_binary:
+                                content.save(image_binary, 'PNG')
+                                image_binary.seek(0)
+                                await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
                     if len(buffered_message) > 0:
                         await self._bind_channel.send(buffered_message)
                     self._messages = []
 
-    def queue_message(self, text: str) -> bool:
+    def queue_message(self, content) -> bool:
         """
         Queue a new message to be sent by the bot.
 
@@ -146,7 +160,7 @@ $player <playername> -- returns the statistics of a player
             return False
 
         with self._message_lock:
-            self._messages.append(text)
+            self._messages.append(content)
         return True
 
     def start(self):

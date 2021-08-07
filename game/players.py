@@ -1,6 +1,8 @@
 # Type annotations without import
 from __future__ import annotations
 from typing import List
+import requests
+from PIL import Image
 
 from game.game_constants import MAX_TEAM_SIZE, TEAM_CHANGE_CHANCE
 
@@ -21,6 +23,9 @@ class Player:
         self.name = name
 
         self.img_path = img_path
+        self.image = Image.open(requests.get(img_path, stream=True).raw)
+        self.image.thumbnail((64, 64), Image.ANTIALIAS)
+
         if location is not None:
             location.active_players[self.name] = self
         self.location = location
@@ -31,6 +36,12 @@ class Player:
         self.alive = True
         self.deathmsg = deathmsg #probably shouldn't initialize them dead
         self._active = True
+    
+    def get_active_image(self):
+        if self.alive:
+            return self.image
+        else:
+            return self.image.convert('L')
 
     def move_to(self, new_location: GraphNode):
         if self.location is not None:
