@@ -38,6 +38,7 @@ class DiscordBot():
         self._world_data = json.load(open("game/world_data.json", 'r'))
         self._event_data = json.load(open("game/event_data.json", 'r'))
         self._player_data = json.load(open("game/players_full.json", 'r'))
+        self._game_lock = Lock()
         self._game = None
 
         @self._client.event
@@ -81,26 +82,33 @@ class DiscordBot():
                     await message.channel.send('atlas-games needs to be bound to a channel first! Use $host')
                 else:
                     await message.channel.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
-                    self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
+                    with self._game_lock:
+                        self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
-                    def player_highlighter(this: GameState, event: Event, players: List[Player]):
-                        imagelist = [p.get_active_image() for p in players]
-                        image_size = 128
+                        def player_highlighter(this: GameState, event: Event, players: List[Player]):
+                            imagelist = [p.get_active_image() for p in players]
+                            image_size = 128
 
-                        result_width = image_size * len(imagelist)
-                        result = Image.new(mode='RGB', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1.5)), color=(54, 57, 63))
-                        for i in range(len(imagelist)):
-                            result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4))
-                        self.queue_message(result)
-                        self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+                            result_width = image_size * len(imagelist)
+                            result = Image.new(mode='RGB', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1.5)), color=(54, 57, 63))
+                            for i in range(len(imagelist)):
+                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4))
+                            self.queue_message(result)
+                            self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
 
-                    self._game.set_event_printer(player_highlighter)
+                        self._game.set_event_printer(player_highlighter)
             elif message.content.startswith('$next'):
-                if self._game is None:
-                    await message.channel.send('No game is running! Start a new game with $newgame.')
+                if self._game_lock.acquire(block=False):
+                    if self._game is None:
+                        print('No game is running! Start a new game with $newgame.')
+                        await message.channel.send('No game is running! Start a new game with $newgame.')
+                    else:
+                        self._game.turn()
+                        self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+                    self._game_lock.release()
                 else:
-                    self._game.turn()
-                    self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+                    print('Game is busy! Try again soon...')
+                    await message.channel.send('Game is busy! Try again soon...')
             elif message.content.startswith('$resume'):
                 self._message_send_pause = False
             elif message.content.startswith('$player'):
