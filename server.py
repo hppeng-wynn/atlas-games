@@ -73,6 +73,7 @@ class DiscordBot():
                 except:
                     await message.channel.send("`$dc PORT`")
             elif message.content.startswith('$host'):
+                print("$host: Wait for lock " + str(content))
                 with self._message_lock:
                     self._messages = []
                     self._bind_channel = message.channel
@@ -156,6 +157,7 @@ $player <playername> -- returns the statistics of a player
                 return
 
             if self._bind_channel is not None:
+                print("loop: wait for lock")
                 with self._message_lock:
                     buffered_message = []
                     buffered_msg_len = 0
@@ -169,6 +171,9 @@ $player <playername> -- returns the statistics of a player
                             if buffered_msg_len > 1000:
                                 await self._bind_channel.send('\n'.join(buffered_message))
                                 buffered_message = []
+                            if sent_msgs >= 10:
+                                self._message_send_pause = True
+                                break
                         else:
                             if len(buffered_message) > 0:
                                 await self._bind_channel.send('\n'.join(buffered_message))
@@ -180,9 +185,6 @@ $player <playername> -- returns the statistics of a player
                                     image_binary.seek(0)
                                     await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
                                 sent_msgs += 1
-                        if sent_msgs >= 10:
-                            self._message_send_pause = True
-                            break
                     if len(buffered_message) > 0:
                         await self._bind_channel.send('\n'.join(buffered_message))
                     if self._message_send_pause:
@@ -198,6 +200,7 @@ $player <playername> -- returns the statistics of a player
         if not self._running:
             return False
 
+        print("queue_message: Wait for lock " + str(content))
         with self._message_lock:
             self._messages.append(content)
         print("Queued message successfully " + str(content))
