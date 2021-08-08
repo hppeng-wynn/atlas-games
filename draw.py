@@ -3,10 +3,12 @@ import math
 
 #NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 16)
 #BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMonoBold.ttf", 16)
-NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSans.ttf", 16)
-BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 16)
-LARGE_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSans.ttf", 42)
-LARGE_BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 42)
+NORMAL_FONT_SIZE = 16
+NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSans.ttf", NORMAL_FONT_SIZE)
+BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", NORMAL_FONT_SIZE)
+LARGE_FONT_SIZE = 40
+LARGE_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSans.ttf", LARGE_FONT_SIZE)
+LARGE_BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", LARGE_FONT_SIZE)
 
 def break_text(text: str, draw: ImageDraw, font: ImageFont, max_width: float):
     """

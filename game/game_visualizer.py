@@ -9,13 +9,16 @@ if __name__ == "__main__":
 
 from typing import List
 from PIL import Image, ImageDraw
-from draw import LARGE_FONT, LARGE_BOLD_FONT, break_text
+from draw import LARGE_FONT, LARGE_BOLD_FONT, LARGE_FONT_SIZE, break_text
 
 N_MARKER_MAX = 10;
 MARKER_WIDTH = 77;
 MARKER_HEIGHT = 77;
-TEAM_IMAGES = [Image.open(f"./resources/team{i}.png").convert('RGBA') for i in range(N_MARKER_MAX)]
+TEAM_IMAGES = [Image.open(f"./resources/team{i}.png").resize((MARKER_WIDTH, MARKER_HEIGHT)).convert('RGBA') for i in range(N_MARKER_MAX)]
 MAP_IMAGE = Image.open("./resources/map.png").convert('RGBA')
+# scale things down.. too slow
+SCALE_FACTOR=2
+MAP_IMAGE = MAP_IMAGE.resize((int(MAP_IMAGE.size[0]/SCALE_FACTOR), int(MAP_IMAGE.size[1]/SCALE_FACTOR)))
 
 def render_map(pois: List[Point], labels: List[str]):
     pois = pois[:min(N_MARKER_MAX, len(pois))]
@@ -39,18 +42,21 @@ def render_map(pois: List[Point], labels: List[str]):
         label_text_max_height = max(label_text_max_height, pixel_height)
         labels[i] = txt
 
-    result_height += label_text_max_height
+    # Arbitrary bottom padding?
+    result_height += label_text_max_height + 15
     result = Image.new(mode='RGBA', size=(base_width, result_height), color=(54, 57, 63))
-    layer2 = Image.new(mode='RGBA', size=(base_width, result_height), color=(0, 0, 0, 0))
     result.paste(im=MAP_IMAGE, box=(0, 0), mask=MAP_IMAGE)
-    draw = ImageDraw.Draw(layer2)
 
     for i, (poi, label) in enumerate(zip(pois, labels)):
-        layer2.paste(im=TEAM_IMAGES[i], box=(int(label_start_x_center - MARKER_WIDTH/2 + i*single_width), label_start_y))
-        layer2.paste(im=TEAM_IMAGES[i], box=(int(poi[0] - MARKER_WIDTH/2), int(poi[1] - MARKER_WIDTH/2)))
-        draw.text((int(label_start_x_center + i*single_width), label_text_y+42), label, font=LARGE_FONT, anchor="ms", fill=(255, 255, 255))
-    return Image.alpha_composite(result, layer2)
+        layer = Image.new(mode='RGBA', size=(base_width, result_height), color=(0, 0, 0, 0))
+        layer.paste(im=TEAM_IMAGES[i], box=(int(label_start_x_center - MARKER_WIDTH/2 + i*single_width), label_start_y))
+        layer.paste(im=TEAM_IMAGES[i], box=(int(poi[0]/SCALE_FACTOR - MARKER_WIDTH/2), int(poi[1]/SCALE_FACTOR - MARKER_WIDTH/2)))
+        draw = ImageDraw.Draw(layer)
+        draw.text((int(label_start_x_center + i*single_width), label_text_y+LARGE_FONT_SIZE), label, font=LARGE_FONT, anchor="ms", fill=(255, 255, 255))
+        result = Image.alpha_composite(result, layer)
+    return result
 
-out = render_map([[500, 500], [1000, 1000]], ["a", "b"*200])
-with open("out.png", 'wb') as outfile:
-    out.save(outfile)
+if __name__ == "__main__":
+    out = render_map([[500, 500], [1000, 1000], [1000, 500], [500, 1000], [1500, 500], [1500, 1000], [1500, 1500]], ["nuts", "bothades", "stress", "test", "longer team name go brr", "hello", "world"])
+    with open("out.png", 'wb') as outfile:
+        out.save(outfile)
