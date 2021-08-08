@@ -1,44 +1,74 @@
 from PIL import Image, ImageDraw, ImageFont
 import math
+from collections import namedtuple
+from enum import Enum
 
 
 #NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 16)
 #BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMonoBold.ttf", 16)
+Font = namedtuple("Font", ["size", "normal", "bold"])
 NORMAL_FONT_SIZE = 16
-NORMAL_FONT = ImageFont.truetype("./fonts/FreeSans.ttf", NORMAL_FONT_SIZE)
-BOLD_FONT = ImageFont.truetype("./fonts/FreeSansBold.ttf", NORMAL_FONT_SIZE)
+NORMAL_FONT = Font(NORMAL_FONT_SIZE,
+                ImageFont.truetype("./fonts/FreeSans.ttf", NORMAL_FONT_SIZE),
+                ImageFont.truetype("./fonts/FreeSansBold.ttf", NORMAL_FONT_SIZE))
 LARGE_FONT_SIZE = 40
-LARGE_FONT = ImageFont.truetype("./fonts/FreeSans.ttf", LARGE_FONT_SIZE)
-LARGE_BOLD_FONT = ImageFont.truetype("./fonts/FreeSansBold.ttf", LARGE_FONT_SIZE)
+LARGE_FONT = Font(LARGE_FONT_SIZE,
+                ImageFont.truetype("./fonts/FreeSans.ttf", LARGE_FONT_SIZE),
+                ImageFont.truetype("./fonts/FreeSansBold.ttf", LARGE_FONT_SIZE))
 
-def break_text(text: str, draw: ImageDraw, font: ImageFont, max_width: float):
+class FontFormat(Enum):
+    BOLD=0
+    UNDERLINE=1
+    ITALIC=2
+
+
+def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
     """
     Break text so that it is at most X pixels wide.
     Will not respect newlines in the input (converts them to spaces).
     """
     max_width = math.floor(max_width)
-    split_points = text.replace('\n', ' ').split(' ')
+    _split_points = (t.replace('*', '* *').split('*') for t in text.replace('\n', ' ').split(' '))
+    split_points = []
+    for arr in _split_points:
+        split_points += arr
+
     lines = []
+    prev_length = 0
+    prev_text = ""
     current_line = None
+    bold_mode = False
+    active_fonts = [font.normal, font.bold]
     while len(split_points):
-        if current_line is None:
+        if split_points[0] == ' ':
+            # Bold transition.
+            prev_length += draw.textsize(tmp_line, font=active_fonts[bold_mode])
+            if current_line == "":
+                prev_text = "*"
+            else:
+                prev_text += current_line+' *'
+            current_line = ""
+            bold_mode = not bold_mode
+            continue
+
+        if current_line == "":
             tmp_line = split_points[0]
         else:
             tmp_line = current_line + ' ' + split_points[0]
         # Ignore height.
-        pixel_width, _ = draw.textsize(tmp_line, font=font)
-        if pixel_width > max_width:
-            if current_line is None:
+        pixel_width, _ = draw.textsize(tmp_line, font=active_fonts[bold_mode])
+        if pixel_width + prev_length > max_width:
+            if current_line == "" and prev_text == "":
                 for i in range(1, len(tmp_line)):
-                    pixel_width, _ = draw.textsize(tmp_line[:i], font=font)
-                    if pixel_width > max_width:
+                    pixel_width, _ = draw.textsize(tmp_line[:i], font=active_fonts[bold_mode])
+                    if pixel_width + prev_length > max_width:
                         break
                 passing = i-1
                 lines.append(tmp_line[:passing])
                 split_points[0] = tmp_line[passing:]
             else:
-                lines.append(current_line)
-                current_line = None
+                lines.append(prev_text + current_line)
+                current_line = ""
         else:
             current_line = tmp_line
             split_points.pop(0)
@@ -58,8 +88,123 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
     ascent, descent = font.getmetrics()
     line_height = ascent + descent
 
+    #set up font temp holder
+    curr_font = font
+
     for i in range(len(textlines)):
-        draw.text((pos[0], pos[1] + i * line_height) , textlines[i], color, font=font)
+        line_arr = [' ' if t is '' else t for t in format_tokenize(textlines[i])]
+        x_offset = 0
+        bold, underline, italic = False, False, False
+
+        buf = ''
+        for t in line_arr:
+            if isinstance(t, str):
+                buf += t
+            else:
+                #draw all text in buffer and flush buffer
+                width, height = draw.textsize(t, font = curr_font)
+                draw.text((pos[0] + x_offset, pos[1] + i * line_height), t, color, font = curr_font)
+                x_offset += width
+                buf = ''
+
+                #THEN process special commands
+                if t is FontFormat.BOLD:
+                    bold = not bold
+                    if bold:
+                        curr_font = font.bold
+                    else:
+                        curr_font = font.normal
+                if t is FontFormat.UNDERLINE:
+                    underline = not underline
+                if t is FontFormat.ITALIC:
+                    italic = not italic
 
 
+def format_tokenize(text: str):
+    r"""
+    Split text by space/newline, but also split out `FontFormat`s
+    \\: \
+    \*: bold
+    \_: underline
+    \|: italic
+    """
+    res = []
+    cur = ""
+    escape_mode = False
+    for char in text:
+        if escape_mode:
+            escape_mode = False
+            if char == '\\':
+                if cur is None:
+                    cur = char
+                else:
+                    cur += char
+                continue
+            if cur is None:
+                pass
+                #res.append("")
+            elif cur != "":
+                res.append(cur)
+            if char == '*':
+                res.append(FontFormat.BOLD)
+            elif char == '_':
+                res.append(FontFormat.UNDERLINE)
+            elif char == '|':
+                res.append(FontFormat.ITALIC)
+            else:
+                raise TypeError(f"Invalid format [{char}]")
+            cur = ""
+            continue
+        if char == '\\':
+            escape_mode = True
+            continue
+        escape_mode = False
+        if char in ' \n':
+            if cur is None:
+                res.append("")
+            elif cur != "":
+                res.append(cur)
+            cur = None
+            continue
+        if cur is None:
+            res.append("")
+            cur = char
+        else:
+            cur += char
+    if escape_mode:
+        raise TypeError("Unterminated \\")
+    if cur is None:
+        res.append("")
+    elif cur != "":
+        res.append(cur)
+    return res
 
+if __name__ == "__main__":
+    # Self test scripts.
+    def test(f, args=[], kwargs={}, name=None, expect=None, compare=lambda a, b: a == b, err=False):
+        if name is not None:
+            print("test "+name)
+        if err:
+            try:
+                f(*args, **kwargs)
+                print("Excepted error but got none")
+                return False
+            except Exception as e:
+                print("OK")
+                return True
+        res = f(*args, **kwargs)
+        if compare(res, expect):
+            print("OK")
+            return True
+        print(f"Assertion fail: {res}, {expect}")
+        return False
+    '''print("draw.py self test")
+    test(format_tokenize, ['asdf'], name="basic", expect=['asdf'])
+    test(format_tokenize, ['asdf bsdf\ncsdf'], name="space and newline", expect=['asdf', '', 'bsdf', '', 'csdf'])
+    test(format_tokenize, [' asdf'], name="leading space", expect=['', 'asdf'])
+    test(format_tokenize, ['     '], name="all space", expect=['', '', '', '', ''])
+    test(format_tokenize, ['asdf '], name="trailing space", expect=['asdf', ''])
+    test(format_tokenize, [r'\*a\*'], name="bold", expect=[FontFormat.BOLD, 'a', FontFormat.BOLD])
+    test(format_tokenize, [r' \*a'], name="leading space B", expect=['', FontFormat.BOLD, 'a'])
+    test(format_tokenize, [r'\* a'], name="leading B space", expect=[FontFormat.BOLD, '', 'a'])
+    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ''])'''

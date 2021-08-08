@@ -24,7 +24,7 @@ font_used = draw.NORMAL_FONT
 
 #break up text
 #text = "Your mother. \n Bottom Text. \n Deez nuts. \n I've finally found it: A tomato trellis that won't collapse or blow over under the weight of my tomato plants. You can make it in about an hour with common materials..."
-text = "ferricles."
+text = "ferricles. \* deez nuts\*"
 text = draw.break_text(text, ImageDraw.Draw(bckgrd), font_used, size[0])
 
 (txtX, txtY) = (0, 2 * TLy + pfp.size[1])
