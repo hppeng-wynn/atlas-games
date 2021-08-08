@@ -24,8 +24,8 @@ class Player:
 
         self.img_path = img_path
         self.image = Image.open(requests.get(img_path, stream=True).raw)
-        self.image.thumbnail((128, 128), Image.ANTIALIAS)
-        self.image = self.image.resize((128, 128))
+        self.image.thumbnail((64, 64), Image.ANTIALIAS)
+        self.image = self.image.resize((64, 64))
 
         if location is not None:
             location.active_players[self.name] = self

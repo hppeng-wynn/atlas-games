@@ -88,7 +88,7 @@ class DiscordBot():
 
                         def player_highlighter(this: GameState, event: Event, players: List[Player]):
                             imagelist = [p.get_active_image() for p in players]
-                            image_size = 128
+                            image_size = 64
 
                             result_width = image_size * len(imagelist)
                             result = Image.new(mode='RGBA', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1.25)), color=(54, 57, 63))
