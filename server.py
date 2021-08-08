@@ -14,7 +14,7 @@ import os
 SERVER_PORT = int(os.environ['PORT'])
 
 import discord
-from discord.ext import tasks
+from discord.ext import tasks, commands
 
 from typing import Union
 
@@ -28,8 +28,10 @@ class DiscordBot():
     """
 
     def __init__(self):
+        self._bot = commands.Bot(command_prefix='$')
+
         self._bot_running = False
-        self._client = discord.Client()
+        # self._client = discord.Client()
         # Message queue for things to send (text for now)
         self._messages = Queue()
         self._message_send_pause = False
@@ -42,16 +44,16 @@ class DiscordBot():
         self._game_lock = Lock()
         self._game = None
 
-        @self._client.event
+        @self._bot.event
         async def on_ready():
             """
             Callback triggered when discord bot is connected.
             """
-            print('We have logged in as {0.user}'.format(self._client))
+            print('We have logged in as {0.user}'.format(self._bot))
             loop.self = self
             loop.start()
 
-        @self._client.event
+        @self._bot.event
         async def on_message(message: discord.Message):
             """
             Callback triggered when a message is sent in a channel viewable by this bot.
@@ -59,89 +61,102 @@ class DiscordBot():
             if not self._running:
                 return
 
-            if message.author == self._client.user:
+            if message.author == self._bot.user:
                 return
             print(f"Message recv: {message.content}")
 
-            if message.content.startswith('$hello'):
-                await message.channel.send(f"Hello! I'm on port {SERVER_PORT}")
-            if message.content.startswith('$dc'):
-                try:
-                    port = int(message.content.split(' ', 1)[1].strip())
-                    if port == SERVER_PORT:
-                        print(f"Disconnecting bot running on port {port}")
-                        await message.channel.send(f"Disconnecting bot running on port {port}")
-                        self.pause()
-                except:
-                    await message.channel.send("`$dc PORT`")
-            elif message.content.startswith('$host'):
-                print("$host: Wait for lock")
-                self._bind_channel = message.channel
-                await message.channel.send('Bound to '+message.channel.name)
-            elif message.content.startswith('$newgame'):
-                if self._bind_channel is None:
-                    await message.channel.send('atlas-games needs to be bound to a channel first! Use $host')
-                else:
-                    await message.channel.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
-                    with self._game_lock:
-                        self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
+        @self._bot.command(name='hello')
+        async def hello(ctx):
+            await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
 
-                        def player_highlighter(this: GameState, event: Event, players: List[Player]):
-                            imagelist = [p.get_active_image() for p in players]
-                            image_size = 64
+        @self._bot.command(name='dc')
+        async def disconnect(ctx, port):
+            try:
+                if port == SERVER_PORT:
+                    print(f"Disconnecting bot running on port {port}")
+                    await ctx.send(f"Disconnecting bot running on port {port}")
+                    self.pause()
+            except:
+                await ctx.send("`$dc PORT`")
+        
+        @self._bot.command(name='host')
+        async def host(ctx):
+            print("$host: Wait for lock")
+            self._bind_channel = ctx.channel
+            await ctx.send('Bound to '+ctx.channel)
 
-                            images_width = image_size*len(players)* 1.25 + image_size/4
-                            result_height = round(image_size*1.25) + 5
+        @self._bot.command(name='newgame')
+        async def newgame(ctx):
+            if self._bind_channel is None:
+                await ctx.send('atlas-games needs to be bound to a channel first! Use $host')
+            else:
+                await ctx.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
+                with self._game_lock:
+                    self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
-                            text_start_y = result_height
-                            event_raw_text = event['text'].format(*(p.name for p in players))
-                            text_horiz_chars = max(len(event_raw_text), 40)
-                            result_width = int(max(images_width, (text_horiz_chars + 2) *9.6))
+                    def player_highlighter(this: GameState, event: Event, players: List[Player]):
+                        imagelist = [p.get_active_image() for p in players]
+                        image_size = 64
 
-                            #TODO compute n_lines, and text, and draw bold/underline...
-                            n_lines = 1
-                            result_height += 16*n_lines
-                            text = event_raw_text
+                        images_width = image_size*len(players)* 1.25 + image_size/4
+                        result_height = round(image_size*1.25) + 5
 
-                            result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
+                        text_start_y = result_height
+                        event_raw_text = event['text'].format(*(p.name for p in players))
+                        text_horiz_chars = max(len(event_raw_text), 40)
+                        result_width = int(max(images_width, (text_horiz_chars + 2) *9.6))
 
-                            d = ImageDraw.Draw(result)
-                            d.multiline_text((5,text_start_y), text, font=NORMAL_FONT, fill=(255, 255, 255))
+                        #TODO compute n_lines, and text, and draw bold/underline...
+                        n_lines = 1
+                        result_height += 16*n_lines
+                        text = event_raw_text
 
-                            for i in range(len(imagelist)):
-                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
-                            self.queue_message(result)
-                            #self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+                        result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
 
-                        self._game.set_event_printer(player_highlighter)
-            elif message.content.startswith('$next'):
-                if self._game_lock.acquire(blocking=False):
-                    print('Got game lock')
-                    if self._game is None:
-                        print('No game is running! Start a new game with $newgame.')
-                        await message.channel.send('No game is running! Start a new game with $newgame.')
-                    else:
-                        print('Starting turn')
-                        self._game.turn()
-                        self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
-                    self._game_lock.release()
-                else:
-                    print('Game is busy! Try again soon...')
-                    await message.channel.send('Game is busy! Try again soon...')
-            elif message.content.startswith('$resume'):
-                print("Resuming printout")
-                self._message_send_pause = False
-            elif message.content.startswith('$player'):
+                        d = ImageDraw.Draw(result)
+                        d.multiline_text((5,text_start_y), text, font=NORMAL_FONT, fill=(255, 255, 255))
+
+                        for i in range(len(imagelist)):
+                            result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
+                        self.queue_message(result)
+                        #self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+
+                    self._game.set_event_printer(player_highlighter)
+        
+        @self._bot.command(name='next')
+        async def next_turn(ctx):
+            if self._game_lock.acquire(blocking=False):
+                print('Got game lock')
                 if self._game is None:
-                    await message.channel.send('No game is running! Start a new game with $newgame.')
+                    print('No game is running! Start a new game with $newgame.')
+                    await ctx.send('No game is running! Start a new game with $newgame.')
                 else:
-                    try:
-                        player_name = message.content.split(' ', 1)[1]
-                        await message.channel.send(self._game.player_info(player_name))
-                    except:
-                        await message.channel.send("`$player <playername>`")
-            elif message.content.startswith('$help'):
-                await message.channel.send(
+                    print('Starting turn')
+                    self._game.turn()
+                    self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+                self._game_lock.release()
+            else:
+                print('Game is busy! Try again soon...')
+                await ctx.send('Game is busy! Try again soon...')
+        
+        @self._bot.command(name='resume')
+        async def resume(ctx):
+            print("Resuming printout")
+            self._message_send_pause = False
+        
+        @self._bot.command(name='player')
+        async def player_info(ctx, player_name):
+            if self._game is None:
+                await ctx.send('No game is running! Start a new game with $newgame.')
+            else:
+                try:
+                    await ctx.send(self._game.player_info(player_name))
+                except:
+                    await ctx.send("`$player <playername>`")
+        
+        @self._bot.command(name='help')
+        async def help_menu(ctx):
+            await ctx.send(
 f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
 here are a few helpful commands: ```ARM
 $hello -- pings the bot, returns the current hosting port (debug use)
@@ -153,7 +168,7 @@ $resume -- resume printing
 $player <playername> -- returns the statistics of a player
 ```''')
 
-        @self._client.event
+        @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
             await reaction.message.add_reaction(reaction.emoji)
@@ -235,7 +250,7 @@ $player <playername> -- returns the statistics of a player
         """
         try:
             start_server(SERVER_PORT)
-            self._client.run(os.environ['TOKEN'])
+            self._bot.run(os.environ['TOKEN'])
         except Exception as e:
             print(e)
             print("exiting")
