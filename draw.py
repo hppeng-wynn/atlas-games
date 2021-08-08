@@ -76,25 +76,28 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
         lines.append(current_line)
     return '\n'.join(lines)
 
-def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos: tuple , color: tuple = (255,255,255)):
+def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos: Tuple[float, float] , color: Tuple[float, float, float] = (255,255,255)):
     """
-    Renders text within an image. Starts rendering the text at position Point.
+    Renders text within an image without copying it. Edits in-place. 
+    Starts rendering the text at position Point. Newlines will break up the text and print on the next line.
+    Does not resize the image, so text that goes out of bounds will not be rendered.
     """
 
     #split the text into individual lines
     textlines = text.split('\n')
 
+    #set up font temp holder and text settings/modes
+    curr_font = font.normal
+    bold, underline, italic = False, False, False
+
     #calculate the font's line height (stackoverflow source: https://stackoverflow.com/questions/43060479/how-to-get-the-font-pixel-height-using-pils-imagefont-class)
-    ascent, descent = font.getmetrics()
+    ascent, descent = curr_font.getmetrics()
     line_height = ascent + descent
 
-    #set up font temp holder
-    curr_font = font
 
     for i in range(len(textlines)):
         line_arr = [' ' if t is '' else t for t in format_tokenize(textlines[i])]
         x_offset = 0
-        bold, underline, italic = False, False, False
 
         buf = ''
         for t in line_arr:
@@ -102,8 +105,8 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
                 buf += t
             else:
                 #draw all text in buffer and flush buffer
-                width, height = draw.textsize(t, font = curr_font)
-                draw.text((pos[0] + x_offset, pos[1] + i * line_height), t, color, font = curr_font)
+                width, height = draw.textsize(buf, font = curr_font)
+                draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
                 x_offset += width
                 buf = ''
 
@@ -118,7 +121,10 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
                     underline = not underline
                 if t is FontFormat.ITALIC:
                     italic = not italic
-
+        
+        #draw the buffered text at the end of the line
+        width, height = draw.textsize(buf, font = curr_font)
+        draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
 
 def format_tokenize(text: str):
     r"""
