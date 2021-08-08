@@ -64,6 +64,7 @@ class DiscordBot():
             if message.author == self._bot.user:
                 return
             print(f"Message recv: {message.content}")
+            await self._bot.process_commands(message)
 
         @self._bot.command(name='hello')
         async def hello(ctx):
