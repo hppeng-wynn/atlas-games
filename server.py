@@ -96,7 +96,7 @@ class DiscordBot():
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event_data):
-                        for event: Event, event_type: str, players: List[Player] in event_data:
+                        for event, event_type, players in event_data:
                             imagelist = [p.get_active_image() for p in players]
                             image_size = 64
 
