@@ -15,25 +15,21 @@ def strToLst(string):
     lst = []
     if string == '':
         return []
-    teststring = string.translate({ord(" "): "", ord('['): " ", ord(']'): " "})
+    teststring = string.translate({ord(" "): None, ord('['): " ", ord(']'): " "})
     lst_of_strings = teststring.split(" ")
     for item in lst_of_strings:
-        if item.isnumeric() and item not in ['', ',']:
-            lst.append([int(item)])
-        else:
-            if item not in ['', ',']:
-                midway = []
-                for x in item:
+        if item not in ['',',']:
+            midway = []
+            for x in item.split(','):
                     if x.isnumeric():
                         midway.append(int(x))
-                lst.append(midway)
+            lst.append(midway)
     return lst
-
 
 events_by_type = dict()
 
 with open(sys.argv[1], 'r') as input_file:
-    for line in input_file:
+    for number,line in enumerate(input_file):
         if line.endswith('\n'):
             line = line[:-1]
         parts = line.split('\t')
@@ -57,6 +53,7 @@ with open(sys.argv[1], 'r') as input_file:
         '''
         Data Validation section
         '''
+        event_line_number = number + 1
 
         teamlist = []
         complist = []
@@ -79,22 +76,20 @@ with open(sys.argv[1], 'r') as input_file:
 
         # Data Validation - checks if the number of players given is equal to TeamList + Solo + Complement
         if event_data['num_players'] != len(teamset | compset) + int(parts[4]):
-            print(
-                f">>> num_players != TeamList + Solo + Complement in '{event_data['text']}' \n")
+            print(f">>> num_players != TeamList + Solo + Complement in line {event_line_number}\n")
 
         # Data Validation - checks for duplicates in the different lists
         if len(teamlist) != len(teamset) or len(complist) != len(compset) or len(deathlist) != len(deathset):
-            print(
-                f">>> a certain list has duplicates in '{event_data['text']}' \n")
+            print(f">>> a certain list has duplicates in line {event_line_number}\n")
 
         # Data Validation - checks for TeamList and ComplementList intersection
         if len(teamset & compset) != 0:
-            print(f">>> team_list and complement_list intersect in '{event_data['text']}' \n")
+            print(f">>> team_list and complement_list intersect in line {event_line_number}\n")
 
         # Data Validation - checks list indices
         for i in (teamset | compset | deathset):
             if event_data['num_players'] <= i:
-                print(f">>> list indice is bigger than num_players in '{event_data['text']}' \n")
+                print(f">>> list indice is bigger than num_players in line {event_line_number}\n")
 
         # Data Validation - checks location existence
         with open('world_data.json') as f:
@@ -102,7 +97,7 @@ with open(sys.argv[1], 'r') as input_file:
             if 'location' in event_data:
                 for loc in event_data['location'].split(','):
                     if loc.strip(' ') not in world_data['nodes'].values():
-                        print(f">>> WARNING: {loc} is not a valid location \n")
+                        print(f">>> WARNING: {loc} is not a valid location (line {event_line_number})\n")
 
 
 with open("event_data.json", 'w') as outfile:
