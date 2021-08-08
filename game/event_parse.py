@@ -46,12 +46,66 @@ with open(sys.argv[1], 'r') as input_file:
             "complement_list": strToLst(parts[5]),
             "radius": int(parts[6]),
         }
+
         if parts[8]:
             event_data["location"] = parts[8]
         if event_type in events_by_type:
             events_by_type[event_type].append(event_data)
         else:
             events_by_type[event_type] = [event_data]
+
+        '''
+        Data Validation section
+        '''
+
+        teamlist = []
+        complist = []
+        deathlist = []
+        teamset = set()
+        compset = set()
+        deathset = set()
+
+        for team in event_data['team_list']:
+            for player in team:
+                teamlist.append(player)
+                teamset.add(player)
+        for team in event_data['complement_list']:
+            for player in team:
+                complist.append(player)
+                compset.add(player)
+        for player in event_data['deaths']:
+            deathlist.append(player)
+            deathset.add(player)
+
+        # Data Validation - checks if the number of players given is equal to TeamList + Solo + Complement
+        if event_data['num_players'] != len(teamset | compset) + int(parts[4]):
+            print(
+                f">>> num_players != TeamList + Solo + Complement in '{event_data['text']}' \n")
+
+        # Data Validation - checks for duplicates in the different lists
+        if len(teamlist) != len(teamset) or len(complist) != len(compset) or len(deathlist) != len(deathset):
+            print(
+                f">>> a certain list has duplicates in '{event_data['text']}' \n")
+
+        # Data Validation - checks for TeamList and ComplementList intersection
+        if len(teamset & compset) != 0:
+            print(
+                f">>> team_list and complement_list intersect in '{event_data['text']}' \n")
+
+        # Data Validation - checks list indices
+        for i in (teamset | compset | deathset):
+            if event_data['num_players'] <= i:
+                print(
+                    f">>> list indice is bigger than num_players in '{event_data['text']}' \n")
+
+        # Data Validation - checks location existence
+        with open('world_data.json') as f:
+            world_data = json.load(f)
+            if 'location' in event_data:
+                for loc in event_data['location'].split(','):
+                    if loc.strip(' ') not in world_data['nodes'].values():
+                        print(f">>> WARNING: {loc} is not a valid location \n")
+
 
 with open("event_data.json", 'w') as outfile:
     json.dump(events_by_type, outfile)
