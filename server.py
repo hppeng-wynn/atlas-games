@@ -19,7 +19,7 @@ from discord.ext import tasks, commands
 from typing import Union
 
 from game.game_state import GameState
-from draw import NORMAL_FONT, BOLD_FONT
+from draw import NORMAL_FONT
 
 class DiscordBot():
     """
@@ -116,7 +116,7 @@ class DiscordBot():
                             result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
 
                             d = ImageDraw.Draw(result)
-                            d.multiline_text((5,text_start_y), text, font=NORMAL_FONT, fill=(255, 255, 255))
+                            d.multiline_text((5,text_start_y), text, font=NORMAL_FONT.normal, fill=(255, 255, 255))
 
                             for i in range(len(imagelist)):
                                 result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
