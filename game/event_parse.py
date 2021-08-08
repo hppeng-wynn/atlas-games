@@ -89,14 +89,12 @@ with open(sys.argv[1], 'r') as input_file:
 
         # Data Validation - checks for TeamList and ComplementList intersection
         if len(teamset & compset) != 0:
-            print(
-                f">>> team_list and complement_list intersect in '{event_data['text']}' \n")
+            print(f">>> team_list and complement_list intersect in '{event_data['text']}' \n")
 
         # Data Validation - checks list indices
         for i in (teamset | compset | deathset):
             if event_data['num_players'] <= i:
-                print(
-                    f">>> list indice is bigger than num_players in '{event_data['text']}' \n")
+                print(f">>> list indice is bigger than num_players in '{event_data['text']}' \n")
 
         # Data Validation - checks location existence
         with open('world_data.json') as f:
