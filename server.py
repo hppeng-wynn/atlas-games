@@ -84,7 +84,7 @@ class DiscordBot():
         async def host(ctx):
             print("$host: Wait for lock")
             self._bind_channel = ctx.channel
-            await ctx.send('Bound to '+ctx.channel)
+            await ctx.send('Bound to '+ctx.channel.name)
 
         @self._bot.command(name='newgame')
         async def newgame(ctx):
@@ -155,19 +155,19 @@ class DiscordBot():
                 except:
                     await ctx.send("`$player <playername>`")
         
-        @self._bot.command(name='help')
-        async def help_menu(ctx):
-            await ctx.send(
-f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
-here are a few helpful commands: ```ARM
-$hello -- pings the bot, returns the current hosting port (debug use)
-$dc <port> -- disconnect the bot running on the specified port (debug use)
-$host -- binds the bot to the current channel
-$newgame -- only after the bot is bound, starts a new round of atlas games
-$next -- starts the next day given that a game is already running
-$resume -- resume printing
-$player <playername> -- returns the statistics of a player
-```''')
+#         @self._bot.command(name='help')
+#         async def help_menu(ctx):
+#             await ctx.send(
+# f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
+# here are a few helpful commands: ```ARM
+# $hello -- pings the bot, returns the current hosting port (debug use)
+# $dc <port> -- disconnect the bot running on the specified port (debug use)
+# $host -- binds the bot to the current channel
+# $newgame -- only after the bot is bound, starts a new round of atlas games
+# $next -- starts the next day given that a game is already running
+# $resume -- resume printing
+# $player <playername> -- returns the statistics of a player
+# ```''')
 
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
