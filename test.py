@@ -23,9 +23,10 @@ for i in range(6):
 font_used = draw.NORMAL_FONT
 
 #break up text
-#text = "Your mother. \n Bottom Text. \n Deez nuts. \n I've finally found it: A tomato trellis that won't collapse or blow over under the weight of my tomato plants. You can make it in about an hour with common materials..."
+text = "Your mother. \n Bottom Text. \n Deez nuts. \n I've finally found it: A tomato trellis that won't collapse or blow over under the weight of my tomato plants. You can make it in about an hour with common materials..."
+text = draw.break_text(text, ImageDraw.Draw(bckgrd), font_used, 40)
 #text = "Hey want some dn? \nWhat's dn \n\*deez nuts\* LMAOOOOOOO owned \nNOOOOOOOOOOO \nlmao \*bruh\nmoment\* ez clap"
-text = "Going bold now \*\n there is no end bold specifier so this should be bold \n and this should too"
+#text = "Going bold now \*\n there is no end bold specifier so this should be bold \n and this should too\*\*"
 
 #text = draw.break_text(text, ImageDraw.Draw(bckgrd), font_used, size[0])
 

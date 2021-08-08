@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 from collections import namedtuple
 from enum import Enum
+from typing import Tuple
 
 
 #NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 16)
@@ -186,9 +187,9 @@ if __name__ == "__main__":
             return True
         print(f"Assertion fail: {res}, {expect}")
         return False
-    '''print("draw.py self test")
+    print("draw.py self test")
     test(format_tokenize, ['asdf'], name="basic", expect=['asdf'])
     test(format_tokenize, [r'\*a\*'], name="bold", expect=[FontFormat.BOLD, 'a', FontFormat.BOLD])
     test(format_tokenize, [r' \*a'], name="leading space B", expect=[' ', FontFormat.BOLD, 'a'])
     test(format_tokenize, [r'\* a'], name="leading B space", expect=[FontFormat.BOLD, ' a'])
-    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ' '])'''
+    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ' '])
