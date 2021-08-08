@@ -9,11 +9,15 @@ if __name__ == "__main__":
 from typing import List, Mapping
 import random
 import copy
+import threading
+from PIL import Image
+import requests
 
 from emojis import ATLOSS
 from game.world import World
 from game.players import Player, Team, try_merge_teams
 from game.game_constants import *
+
 
 """
 class Event:
@@ -53,6 +57,30 @@ class GameState:
         self._print = output_function
         self._event_printer = lambda this, event, players: print(event['text'].format(*(p.name for p in players)))
 
+        img_map: Mapping[str, Image] = dict()
+        def download_imgs(urlmap: Mapping[str, str], idx_low: int, idx_high: int) -> List[Image]:
+            for i in range(idx_low, idx_high):
+                image = Image.open(requests.get(name_url_data[i][1], stream=True).raw)
+                image.thumbnail((64, 64), Image.ANTIALIAS)
+                image = image.resize((64, 64))
+                img_map[name_url_data[i][0]] = image
+        
+        name_url_data = []
+        for data in sorted(player_data, key = lambda d: d['name']):
+            name_url_data.append([data['name'], data.get('img', '')])
+
+        num_players = len(name_url_data)
+        thread_objs = []
+        NUM_THREADS = 4
+        for i in range(NUM_THREADS):
+            thread = threading.Thread(target = download_imgs, args = (name_url_data, (int)(i * num_players / NUM_THREADS), (int)((i+1) * num_players / NUM_THREADS), ) )
+            thread_objs.append(thread)
+
+        for t in thread_objs:
+            t.start()
+        for t in thread_objs:
+            t.join()
+
         # Initialize players and teams.
         # Players always are on a team (if they are solo they are on their own team).
         # Players can start on the same team by specifying the "team" field, and that team will be named
@@ -70,7 +98,7 @@ class GameState:
                 teams_by_name[team_name] = player_team
                 self._teams.append(player_team)
                     
-            new_player = Player(data["name"], data.get("img", ""), player_team)
+            new_player = Player(data["name"], data.get("img", ""), player_team, img = img_map[data['name']])
             self._players[new_player.name] = new_player
             player_team.players[new_player.name] = new_player
         

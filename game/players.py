@@ -19,13 +19,16 @@ class Player:
     """
 
     #Constructs a player.
-    def __init__(self, name: str, img_path: str = "", team: Team=None, location: GraphNode=None, kills: int = 0, deathmsg: str = ""):
+    def __init__(self, name: str, img_path: str = "", team: Team=None, location: GraphNode=None, kills: int = 0, deathmsg: str = "", img: Image = None):
         self.name = name
 
-        self.img_path = img_path
-        self.image = Image.open(requests.get(img_path, stream=True).raw)
-        self.image.thumbnail((64, 64), Image.ANTIALIAS)
-        self.image = self.image.resize((64, 64))
+        if img is None:
+            self.img_path = img_path
+            self.image = Image.open(requests.get(img_path, stream=True).raw)
+            self.image.thumbnail((64, 64), Image.ANTIALIAS)
+            self.image = self.image.resize((64, 64))
+        else:
+            self.image = img
 
         if location is not None:
             location.active_players[self.name] = self
