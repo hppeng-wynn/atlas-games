@@ -99,10 +99,12 @@ class DiscordBot():
                         self._game.set_event_printer(player_highlighter)
             elif message.content.startswith('$next'):
                 if self._game_lock.acquire(block=False):
+                    print('Got game lock')
                     if self._game is None:
                         print('No game is running! Start a new game with $newgame.')
                         await message.channel.send('No game is running! Start a new game with $newgame.')
                     else:
+                        print('Starting turn')
                         self._game.turn()
                         self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
                     self._game_lock.release()
