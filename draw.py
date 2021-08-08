@@ -27,56 +27,57 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
     Will not respect newlines in the input (converts them to spaces).
     """
     max_width = math.floor(max_width)
-    _split_points = (t.replace('*', '* *').split('*') for t in text.replace('\n', ' ').split(' '))
-    split_points = []
-    for arr in _split_points:
-        split_points += arr
-
-    lines = []
+    mode_changes = format_tokenize(text)
     prev_length = 0
-    prev_text = ""
-    current_line = None
     bold_mode = False
+    lines = []
+    prev_text = ""
+    current_line = ""
     active_fonts = [font.normal, font.bold]
-    while len(split_points):
-        if split_points[0] == ' ':
-            # Bold transition.
-            prev_length += draw.textsize(tmp_line, font=active_fonts[bold_mode])
-            if current_line == "":
-                prev_text = "*"
-            else:
-                prev_text += current_line+' *'
-            current_line = ""
+    for content in mode_changes:
+        if content == FontFormat.BOLD:
+            pixel_width, _ = draw.textsize(current_line, font=active_fonts[bold_mode])
+            prev_length += pixel_width
+            prev_text += r'\*'
             bold_mode = not bold_mode
             continue
+        elif content == FontFormat.UNDERLINE:
+            continue
+        elif content == FontFormat.ITALIC:
+            continue
+        split_points = content.replace('\n', ' ').split(' ')
 
-        if current_line == "":
-            tmp_line = split_points[0]
-        else:
-            tmp_line = current_line + ' ' + split_points[0]
-        # Ignore height.
-        pixel_width, _ = draw.textsize(tmp_line, font=active_fonts[bold_mode])
-        if pixel_width + prev_length > max_width:
-            if current_line == "" and prev_text == "":
-                for i in range(1, len(tmp_line)):
-                    pixel_width, _ = draw.textsize(tmp_line[:i], font=active_fonts[bold_mode])
-                    if pixel_width + prev_length > max_width:
-                        break
-                passing = i-1
-                lines.append(tmp_line[:passing])
-                split_points[0] = tmp_line[passing:]
+        while len(split_points):
+            if current_line == "":
+                tmp_line = split_points[0]
             else:
-                lines.append(prev_text + current_line)
-                current_line = ""
-        else:
-            current_line = tmp_line
-            split_points.pop(0)
-    if current_line is not None:
-        lines.append(current_line)
+                tmp_line = current_line + ' ' + split_points[0]
+            # Ignore height.
+            pixel_width, _ = draw.textsize(tmp_line, font=active_fonts[bold_mode])
+            if pixel_width + prev_length > max_width:
+                if current_line == "" and prev_text == "":
+                    for i in range(1, len(tmp_line)):
+                        pixel_width, _ = draw.textsize(tmp_line[:i], font=active_fonts[bold_mode])
+                        if pixel_width + prev_length > max_width:
+                            break
+                    passing = i-1
+                    lines.append(tmp_line[:passing])
+                    split_points[0] = tmp_line[passing:]
+                else:
+                    lines.append(prev_text + current_line)
+                    prev_length = 0
+                    prev_text = ""
+                    current_line = ""
+            else:
+                current_line = tmp_line
+                split_points.pop(0)
+        prev_text += current_line
+    if prev_text is not None:
+        lines.append(prev_text)
     return '\n'.join(lines)
 
 def format_tokenize(text: str):
-    r"""
+    """
     Split text by space/newline, but also split out `FontFormat`s
     \\: \
     \*: bold

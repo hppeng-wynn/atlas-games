@@ -30,7 +30,7 @@ def render_map(pois: List[Point], labels: List[str]):
     single_width = base_width / N_MARKER_MAX;
     used_width = single_width * len(labels)
     label_start_x_center = (base_width - used_width + single_width)/2
-    max_label_width = single_width - 20;
+    max_label_width = single_width - 10;
 
     draw = ImageDraw.Draw(MAP_IMAGE)
 
@@ -38,7 +38,7 @@ def render_map(pois: List[Point], labels: List[str]):
     label_text_max_height = 0
     for i, label in enumerate(labels):
         txt = break_text(label, draw, LARGE_FONT, max_label_width)
-        _, pixel_height = draw.textsize(txt, font=LARGE_FONT)
+        _, pixel_height = draw.textsize(txt, font=LARGE_FONT.normal)
         label_text_max_height = max(label_text_max_height, pixel_height)
         labels[i] = txt
 
@@ -52,7 +52,7 @@ def render_map(pois: List[Point], labels: List[str]):
         layer.paste(im=TEAM_IMAGES[i], box=(int(label_start_x_center - MARKER_WIDTH/2 + i*single_width), label_start_y))
         layer.paste(im=TEAM_IMAGES[i], box=(int(poi[0]/SCALE_FACTOR - MARKER_WIDTH/2), int(poi[1]/SCALE_FACTOR - MARKER_WIDTH/2)))
         draw = ImageDraw.Draw(layer)
-        draw.text((int(label_start_x_center + i*single_width), label_text_y+LARGE_FONT.size), label, font=LARGE_FONT, anchor="ms", fill=(255, 255, 255))
+        draw.text((int(label_start_x_center + i*single_width), label_text_y+LARGE_FONT.size), label, font=LARGE_FONT.normal, anchor="ms", fill=(255, 255, 255))
         result = Image.alpha_composite(result, layer)
     return result
 
