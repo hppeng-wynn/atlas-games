@@ -135,15 +135,9 @@ def format_tokenize(text: str):
         if escape_mode:
             escape_mode = False
             if char == '\\':
-                if cur is None:
-                    cur = char
-                else:
-                    cur += char
+                cur += char
                 continue
-            if cur is None:
-                pass
-                #res.append("")
-            elif cur != "":
+            if cur != "":
                 res.append(cur)
             if char == '*':
                 res.append(FontFormat.BOLD)
@@ -159,23 +153,10 @@ def format_tokenize(text: str):
             escape_mode = True
             continue
         escape_mode = False
-        if char in ' \n':
-            if cur is None:
-                res.append("")
-            elif cur != "":
-                res.append(cur)
-            cur = None
-            continue
-        if cur is None:
-            res.append("")
-            cur = char
-        else:
-            cur += char
+        cur += char
     if escape_mode:
         raise TypeError("Unterminated \\")
-    if cur is None:
-        res.append("")
-    elif cur != "":
+    if cur != "":
         res.append(cur)
     return res
 
@@ -200,11 +181,7 @@ if __name__ == "__main__":
         return False
     '''print("draw.py self test")
     test(format_tokenize, ['asdf'], name="basic", expect=['asdf'])
-    test(format_tokenize, ['asdf bsdf\ncsdf'], name="space and newline", expect=['asdf', '', 'bsdf', '', 'csdf'])
-    test(format_tokenize, [' asdf'], name="leading space", expect=['', 'asdf'])
-    test(format_tokenize, ['     '], name="all space", expect=['', '', '', '', ''])
-    test(format_tokenize, ['asdf '], name="trailing space", expect=['asdf', ''])
     test(format_tokenize, [r'\*a\*'], name="bold", expect=[FontFormat.BOLD, 'a', FontFormat.BOLD])
-    test(format_tokenize, [r' \*a'], name="leading space B", expect=['', FontFormat.BOLD, 'a'])
-    test(format_tokenize, [r'\* a'], name="leading B space", expect=[FontFormat.BOLD, '', 'a'])
-    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ''])'''
+    test(format_tokenize, [r' \*a'], name="leading space B", expect=[' ', FontFormat.BOLD, 'a'])
+    test(format_tokenize, [r'\* a'], name="leading B space", expect=[FontFormat.BOLD, ' a'])
+    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ' '])'''

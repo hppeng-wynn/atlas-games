@@ -3,3 +3,8 @@ __pycache__
 local.py
 .venv
 .lib
+lib/python3.7/
+bin/
+share/
+lib64
+pyenv.cfg
