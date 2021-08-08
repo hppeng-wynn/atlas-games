@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import math
 
+
 #NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 16)
 #BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMonoBold.ttf", 16)
 NORMAL_FONT_SIZE = 16
@@ -44,4 +45,21 @@ def break_text(text: str, draw: ImageDraw, font: ImageFont, max_width: float):
     if current_line is not None:
         lines.append(current_line)
     return '\n'.join(lines)
+
+def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos: tuple , color: tuple = (255,255,255)):
+    """
+    Renders text within an image. Starts rendering the text at position Point.
+    """
+
+    #split the text into individual lines
+    textlines = text.split('\n')
+
+    #calculate the font's line height (stackoverflow source: https://stackoverflow.com/questions/43060479/how-to-get-the-font-pixel-height-using-pils-imagefont-class)
+    ascent, descent = font.getmetrics()
+    line_height = ascent + descent
+
+    for i in range(len(textlines)):
+        draw.text((pos[0], pos[1] + i * line_height) , textlines[i], color, font=font)
+
+
 
