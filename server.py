@@ -73,7 +73,7 @@ class DiscordBot():
                 except:
                     await message.channel.send("`$dc PORT`")
             elif message.content.startswith('$host'):
-                print("$host: Wait for lock " + str(content))
+                print("$host: Wait for lock")
                 with self._message_lock:
                     self._messages = []
                     self._bind_channel = message.channel
