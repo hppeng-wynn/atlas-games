@@ -3,6 +3,7 @@ import math
 from collections import namedtuple
 from enum import Enum
 
+
 #NORMAL_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMono.ttf", 16)
 #BOLD_FONT = ImageFont.truetype("Pillow/Tests/fonts/FreeMonoBold.ttf", 16)
 Font = namedtuple("Font", ["size", "normal", "bold"])
@@ -76,6 +77,56 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
         lines.append(prev_text)
     return '\n'.join(lines)
 
+def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos: Tuple[float, float] , color: Tuple[float, float, float] = (255,255,255)):
+    """
+    Renders text within an image without copying it. Edits in-place. 
+    Starts rendering the text at position Point. Newlines will break up the text and print on the next line.
+    Does not resize the image, so text that goes out of bounds will not be rendered.
+    """
+
+    #split the text into individual lines
+    textlines = text.split('\n')
+
+    #set up font temp holder and text settings/modes
+    curr_font = font.normal
+    bold, underline, italic = False, False, False
+
+    #calculate the font's line height (stackoverflow source: https://stackoverflow.com/questions/43060479/how-to-get-the-font-pixel-height-using-pils-imagefont-class)
+    ascent, descent = curr_font.getmetrics()
+    line_height = ascent + descent
+
+
+    for i in range(len(textlines)):
+        line_arr = [' ' if t is '' else t for t in format_tokenize(textlines[i])]
+        x_offset = 0
+
+        buf = ''
+        for t in line_arr:
+            if isinstance(t, str):
+                buf += t
+            else:
+                #draw all text in buffer and flush buffer
+                width, height = draw.textsize(buf, font = curr_font)
+                draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
+                x_offset += width
+                buf = ''
+
+                #THEN process special commands
+                if t is FontFormat.BOLD:
+                    bold = not bold
+                    if bold:
+                        curr_font = font.bold
+                    else:
+                        curr_font = font.normal
+                if t is FontFormat.UNDERLINE:
+                    underline = not underline
+                if t is FontFormat.ITALIC:
+                    italic = not italic
+        
+        #draw the buffered text at the end of the line
+        width, height = draw.textsize(buf, font = curr_font)
+        draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
+
 def format_tokenize(text: str):
     """
     Split text by space/newline, but also split out `FontFormat`s
@@ -135,9 +186,9 @@ if __name__ == "__main__":
             return True
         print(f"Assertion fail: {res}, {expect}")
         return False
-    print("draw.py self test")
+    '''print("draw.py self test")
     test(format_tokenize, ['asdf'], name="basic", expect=['asdf'])
     test(format_tokenize, [r'\*a\*'], name="bold", expect=[FontFormat.BOLD, 'a', FontFormat.BOLD])
     test(format_tokenize, [r' \*a'], name="leading space B", expect=[' ', FontFormat.BOLD, 'a'])
     test(format_tokenize, [r'\* a'], name="leading B space", expect=[FontFormat.BOLD, ' a'])
-    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ' '])
+    test(format_tokenize, [r'a\* '], name="trailing space B", expect=['a', FontFormat.BOLD, ' '])'''

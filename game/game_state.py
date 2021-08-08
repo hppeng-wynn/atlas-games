@@ -73,7 +73,7 @@ class GameState:
         thread_objs = []
         NUM_THREADS = 4
         for i in range(NUM_THREADS):
-            thread = threading.Thread(target = download_imgs, args = (name_url_data, (int)(i * num_players / NUM_THREADS), (int)((i+1) * num_players / NUM_THREADS), ) )
+            thread = threading.Thread(target = download_imgs, args = (name_url_data, round(i / NUM_THREADS * num_players), round((i+1) / NUM_THREADS * num_players), ) )
             thread_objs.append(thread)
 
         for t in thread_objs:
