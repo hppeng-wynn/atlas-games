@@ -8,6 +8,7 @@ import asyncio
 import json
 from io import BytesIO
 from PIL import Image
+from queue import Queue
 
 import os
 SERVER_PORT = int(os.environ['PORT'])
@@ -29,8 +30,7 @@ class DiscordBot():
         self._bot_running = False
         self._client = discord.Client()
         # Message queue for things to send (text for now)
-        self._message_lock = Lock()
-        self._messages = []
+        self._messages = Queue()
         self._message_send_pause = False
         self._bind_channel = None
         self._running = True
@@ -47,6 +47,7 @@ class DiscordBot():
             Callback triggered when discord bot is connected.
             """
             print('We have logged in as {0.user}'.format(self._client))
+            loop.self = self
             loop.start()
 
         @self._client.event
@@ -75,7 +76,6 @@ class DiscordBot():
             elif message.content.startswith('$host'):
                 print("$host: Wait for lock")
                 with self._message_lock:
-                    self._messages = []
                     self._bind_channel = message.channel
                 await message.channel.send('Bound to '+message.channel.name)
             elif message.content.startswith('$newgame'):
@@ -113,6 +113,7 @@ class DiscordBot():
                     print('Game is busy! Try again soon...')
                     await message.channel.send('Game is busy! Try again soon...')
             elif message.content.startswith('$resume'):
+                print("Resuming printout")
                 self._message_send_pause = False
             elif message.content.startswith('$player'):
                 if self._game is None:
@@ -150,6 +151,7 @@ $player <playername> -- returns the statistics of a player
             For now: Reads messages out of the message queue (can be filled by other threads)
             and spits them out into the bound channel.
             """
+            self = loop.self
             print(f"Heartbeat: {time.time()}")
             if not self._running:
                 return
@@ -157,39 +159,37 @@ $player <playername> -- returns the statistics of a player
                 return
 
             if self._bind_channel is not None:
-                print("loop: wait for lock")
-                with self._message_lock:
-                    buffered_message = []
-                    buffered_msg_len = 0
-                    sent_msgs = 0
-                    for content in self._messages:
-                        if isinstance(content, str):
-                            buffered_msg_len += len(content) + 1
-                            if len(buffered_message) == 0:
-                                sent_msgs += 1
-                            buffered_message.append(content)
-                            if buffered_msg_len > 1000:
-                                await self._bind_channel.send('\n'.join(buffered_message))
-                                buffered_message = []
-                            if sent_msgs >= 10:
-                                self._message_send_pause = True
-                                break
-                        else:
-                            if len(buffered_message) > 0:
-                                await self._bind_channel.send('\n'.join(buffered_message))
-                                buffered_message = []
+                buffered_message = []
+                buffered_msg_len = 0
+                sent_msgs = 0
+                while not self._messages.empty():
+                    content = self._messages.get()
+                    if isinstance(content, str):
+                        buffered_msg_len += len(content) + 1
+                        if len(buffered_message) == 0:
+                            sent_msgs += 1
+                        buffered_message.append(content)
+                        if buffered_msg_len > 1000:
+                            await self._bind_channel.send('\n'.join(buffered_message))
+                            buffered_message = []
+                        if sent_msgs >= 10:
+                            self._message_send_pause = True
+                            break
+                    else:
+                        if len(buffered_message) > 0:
+                            await self._bind_channel.send('\n'.join(buffered_message))
+                            buffered_message = []
 
-                            if isinstance(content, Image.Image):
-                                with BytesIO() as image_binary:
-                                    content.save(image_binary, 'PNG')
-                                    image_binary.seek(0)
-                                    await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
-                                sent_msgs += 1
-                    if len(buffered_message) > 0:
-                        await self._bind_channel.send('\n'.join(buffered_message))
-                    if self._message_send_pause:
-                        await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
-                    self._messages = []
+                        if isinstance(content, Image.Image):
+                            with BytesIO() as image_binary:
+                                content.save(image_binary, 'PNG')
+                                image_binary.seek(0)
+                                await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
+                            sent_msgs += 1
+                if len(buffered_message) > 0:
+                    await self._bind_channel.send('\n'.join(buffered_message))
+                if self._message_send_pause:
+                    await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
 
     def queue_message(self, content) -> bool:
         """
@@ -200,10 +200,7 @@ $player <playername> -- returns the statistics of a player
         if not self._running:
             return False
 
-        print("queue_message: Wait for lock " + str(content))
-        with self._message_lock:
-            self._messages.append(content)
-        print("Queued message successfully " + str(content))
+        self._messages.put(content)
         return True
 
     def start(self):

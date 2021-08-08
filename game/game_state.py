@@ -460,7 +460,7 @@ if __name__ == "__main__":
     event_data = json.load(open("event_data.json", 'r'))
     #player_data = json.load(open("players_simple.json", 'r'))
     player_data = json.load(open("players_full.json", 'r'))
-    game = GameState(world_data, player_data, event_data, seed=1015622136)
+    game = GameState(world_data, player_data, event_data, seed=1644003087)
     while True:
         print(f"Alive: {len(game._players)}, Dead: {len(game._dead_players)}")
 #         print("Active teams:")
