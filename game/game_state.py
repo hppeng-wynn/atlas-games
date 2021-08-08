@@ -55,7 +55,7 @@ class GameState:
         self._event_probability = copy.copy(EVENT_PROBABILITY)      # Probability for each event. Changes over time
         self._hunt_chance = 0                           # Chance (0-1) that a team will decide to go hunting.
         self._print = output_function
-        self._event_printer = lambda this, event, players: print(event['text'].format(*(p.name for p in players)))
+        self._event_printer = lambda this, event_data: [print(event['text'].format(*(p.name for p in players))) for event, etype, players in event_data]
 
         img_map: Mapping[str, Image] = dict()
         def download_imgs(urlmap: Mapping[str, str], idx_low: int, idx_high: int) -> List[Image]:
@@ -183,7 +183,6 @@ class GameState:
                     players[i].kills += len(event['deaths'])
 
         #TODO bind to frontend properly
-        self._event_printer(self, event, players)
         return killed_players
 
 
@@ -291,6 +290,8 @@ class GameState:
         killed_players = []
         for event, event_type, player_set in event_list:
             killed_players += self.process_event(event, event_type, player_set)
+
+        self._event_printer(self, event_list)
 
         self._print(f"{len(killed_players)} cannon shots can be heard in the distance.")
         for player in killed_players:

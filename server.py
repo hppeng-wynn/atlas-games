@@ -95,32 +95,33 @@ class DiscordBot():
                 with self._game_lock:
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
-                    def player_highlighter(this: GameState, event: Event, players: List[Player]):
-                        imagelist = [p.get_active_image() for p in players]
-                        image_size = 64
+                    def player_highlighter(this: GameState, event_data):
+                        for event: Event, event_type: str, players: List[Player] in event_data:
+                            imagelist = [p.get_active_image() for p in players]
+                            image_size = 64
 
-                        images_width = image_size*len(players)* 1.25 + image_size/4
-                        result_height = round(image_size*1.25) + 5
+                            images_width = image_size*len(players)* 1.25 + image_size/4
+                            result_height = round(image_size*1.25) + 5
 
-                        text_start_y = result_height
-                        event_raw_text = event['text'].format(*(p.name for p in players))
-                        text_horiz_chars = max(len(event_raw_text), 40)
-                        result_width = int(max(images_width, (text_horiz_chars + 2) *9.6))
+                            text_start_y = result_height
+                            event_raw_text = event['text'].format(*(p.name for p in players))
+                            text_horiz_chars = max(len(event_raw_text), 40)
+                            result_width = int(max(images_width, (text_horiz_chars + 2) *9.6))
 
-                        #TODO compute n_lines, and text, and draw bold/underline...
-                        n_lines = 1
-                        result_height += 16*n_lines
-                        text = event_raw_text
+                            #TODO compute n_lines, and text, and draw bold/underline...
+                            n_lines = 1
+                            result_height += 16*n_lines
+                            text = event_raw_text
 
-                        result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
+                            result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
 
-                        d = ImageDraw.Draw(result)
-                        d.multiline_text((5,text_start_y), text, font=NORMAL_FONT, fill=(255, 255, 255))
+                            d = ImageDraw.Draw(result)
+                            d.multiline_text((5,text_start_y), text, font=NORMAL_FONT, fill=(255, 255, 255))
 
-                        for i in range(len(imagelist)):
-                            result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
-                        self.queue_message(result)
-                        #self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+                            for i in range(len(imagelist)):
+                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
+                            self.queue_message(result)
+                            #self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
 
                     self._game.set_event_printer(player_highlighter)
         
