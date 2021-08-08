@@ -75,8 +75,7 @@ class DiscordBot():
                     await message.channel.send("`$dc PORT`")
             elif message.content.startswith('$host'):
                 print("$host: Wait for lock")
-                with self._message_lock:
-                    self._bind_channel = message.channel
+                self._bind_channel = message.channel
                 await message.channel.send('Bound to '+message.channel.name)
             elif message.content.startswith('$newgame'):
                 if self._bind_channel is None:
