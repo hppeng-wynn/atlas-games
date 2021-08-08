@@ -90,9 +90,9 @@ class DiscordBot():
                             image_size = 128
 
                             result_width = image_size * len(imagelist)
-                            result = Image.new(mode='RGBA', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1.5)), color=(54, 57, 63))
+                            result = Image.new(mode='RGBA', size=(result_width + image_size // 4 * (len(imagelist) + 1), round(image_size * 1)), color=(54, 57, 63))
                             for i in range(len(imagelist)):
-                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
+                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), 0), mask=imagelist[i].convert('RGBA'))
                             self.queue_message(result)
                             self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
 
