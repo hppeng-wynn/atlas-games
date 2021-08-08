@@ -28,7 +28,7 @@ class DiscordBot():
     """
 
     def __init__(self):
-        self._bot = commands.Bot(command_prefix='$')
+        self._bot = commands.Bot(command_prefix='$', help_command=None)
 
         self._bot_running = False
         # self._client = discord.Client()
