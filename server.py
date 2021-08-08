@@ -31,6 +31,7 @@ class DiscordBot():
         # Message queue for things to send (text for now)
         self._message_lock = Lock()
         self._messages = []
+        self._message_send_pause = False
         self._bind_channel = None
         self._running = True
 
@@ -100,6 +101,8 @@ class DiscordBot():
                 else:
                     self._game.turn()
                     self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+            elif message.content.startswith('$resume'):
+                self._message_send_pause = False
             elif message.content.startswith('$player'):
                 if self._game is None:
                     await message.channel.send('No game is running! Start a new game with $newgame.')
@@ -118,6 +121,7 @@ $dc <port> -- disconnect the bot running on the specified port (debug use)
 $host -- binds the bot to the current channel
 $newgame -- only after the bot is bound, starts a new round of atlas games
 $next -- starts the next day given that a game is already running
+$resume -- resume printing
 $player <playername> -- returns the statistics of a player
 ```''')
 
@@ -138,19 +142,41 @@ $player <playername> -- returns the statistics of a player
             print(f"Heartbeat: {time.time()}")
             if not self._running:
                 return
+            elif self._message_send_pause:
+                return
+
             if self._bind_channel is not None:
                 with self._message_lock:
-                    buffered_message = ""
+                    buffered_message = []
+                    buffered_msg_len = 0
+                    sent_msgs = 0
                     for content in self._messages:
                         if isinstance(content, str):
-                            await self._bind_channel.send(content)
-                        elif isinstance(content, Image.Image):
-                            with BytesIO() as image_binary:
-                                content.save(image_binary, 'PNG')
-                                image_binary.seek(0)
-                                await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
+                            buffered_msg_len += len(content) + 1
+                            if len(buffered_message) == 0:
+                                sent_msgs += 1
+                            buffered_message.append(content)
+                            if buffered_msg_len > 1000:
+                                await self._bind_channel.send('\n'.join(buffered_message))
+                                buffered_message = []
+                        else:
+                            if len(buffered_message) > 0:
+                                await self._bind_channel.send('\n'.join(buffered_message))
+                                buffered_message = []
+
+                            if isinstance(content, Image.Image):
+                                with BytesIO() as image_binary:
+                                    content.save(image_binary, 'PNG')
+                                    image_binary.seek(0)
+                                    await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
+                                sent_msgs += 1
+                        if sent_msgs >= 10:
+                            self._message_send_pause = True
+                            break
                     if len(buffered_message) > 0:
-                        await self._bind_channel.send(buffered_message)
+                        await self._bind_channel.send('\n'.join(buffered_message))
+                    if self._message_send_pause:
+                        await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
                     self._messages = []
 
     def queue_message(self, content) -> bool:
