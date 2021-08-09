@@ -19,8 +19,9 @@ class World:
         self._starting_nodes = world_data["starting"]
         for node_id, node_name in world_data["nodes"].items():
             edges = world_data["connections"][node_id]
+            node_coords = world_data["coordinates"][node_id]
             node_id = int(node_id)
-            node = GraphNode(node_id, node_name, edges, self)
+            node = GraphNode(node_id, node_coords, node_name, edges, self)
             self._nodes[node_id] = node
             self._name_nodes[node_name] = node
 
@@ -33,7 +34,7 @@ class World:
     def node_from_name(self, node_name):
         return self._name_nodes.get(node_name, None)
 
-    def players_near(self, node: GraphNode, distance: int, 
+    def players_near(self, node: GraphNode, distance: int,
                             filter_func = lambda player: True):
         q = SimpleQueue()
         q.put((node, 0))
@@ -69,9 +70,10 @@ class World:
         return None
 
 class GraphNode:
-    def __init__(self, node_id: int, name: str, edges: List[int], graph: World):
+    def __init__(self, node_id: int, node_coords: [int,int], name: str, edges: List[int], graph: World):
         self._graph = graph
         self.id: int = node_id
+        self.coords: [int,int] = node_coords
         self.name: str = name
         self.edges: List[int] = edges
         self.active_players = dict()
