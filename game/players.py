@@ -96,7 +96,7 @@ class Team:
 
     def get_display_name(self):
         if self.name is None:
-            return '+'.join(p.name for p in self.players.values())
+            return ' '.join(p.name for p in self.players.values())
         return self.name
 
     def move_to(self, new_location: GraphNode):
