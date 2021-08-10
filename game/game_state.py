@@ -12,11 +12,13 @@ import copy
 import threading
 from PIL import Image
 import requests
+import math
 
 from emojis import ATLOSS
 from game.world import World
 from game.players import Player, Team, try_merge_teams
 from game.game_constants import *
+from game.game_visualizer import render_map
 
 
 """
@@ -64,7 +66,7 @@ class GameState:
                 image.thumbnail((64, 64), Image.ANTIALIAS)
                 image = image.resize((64, 64))
                 img_map[name_url_data[i][0]] = image
-        
+
         name_url_data = []
         for data in sorted(player_data, key = lambda d: d['name']):
             name_url_data.append([data['name'], data.get('img', '')])
@@ -97,11 +99,11 @@ class GameState:
                 player_team = Team(len(self._teams), None)
                 teams_by_name[team_name] = player_team
                 self._teams.append(player_team)
-                    
+
             new_player = Player(data["name"], data.get("img", ""), player_team, img = img_map[data['name']])
             self._players[new_player.name] = new_player
             player_team.players[new_player.name] = new_player
-        
+
         # Map for all players (dead or alive). Do not mutate
         self._players_static = copy.copy(self._players)
 
@@ -159,7 +161,7 @@ class GameState:
         - event:            Event to process
         - event_type:       event type (not stored with event since im a dumbass)
         - players:          List of players participating in this event, in order
-        
+
         Return:
             List of killed players (may be empty)
         """
@@ -243,7 +245,7 @@ class GameState:
                     else:
                         event_text = "{"+"}, {".join(str(x) for x in range(len(player_names) - 1))+"}, and {"+str(len(player_names) - 1)+"} hunt for other tributes."
                     event_list.append(({
-                            'text': event_text, 
+                            'text': event_text,
                             'deaths': []
                         }, 'hunt', team.players.values()))
                     continue;
@@ -298,6 +300,35 @@ class GameState:
             self._print(f"{ATLOSS} {player.name}")
         for player in self._players.values():
             player._active = True
+
+
+    def print_map(self, location_list: List(Team or Player)=None):
+        coordlst = []
+        obj_names = []
+        if location_list:
+            for obj in location_list:
+                center_x = obj.location.coords[0]
+                center_y = obj.location.coords[1]
+                theta = random.uniform(0,2*math.pi)
+                gamma = random.uniform(0,1)
+                x = 200 * math.sqrt(gamma) * math.cos(theta)
+                y = 100 * math.sqrt(gamma) * math.sin(theta)
+                coords = [center_x+x,center_y+y]
+                coordlst.append(coords)
+
+                if type(obj) == Team:
+                    if obj.active_player_count() != 0:
+                        obj_names.append(obj.get_display_name())
+                if type(obj) == Player:
+                    obj_names.append(obj.name)
+
+            worldmap = render_map(coordlst,obj_names)
+            return worldmap
+
+        else:
+            teams_copy = self._teams.copy()
+            teams_sorted = sorted(teams_copy,key=lambda team: team.active_player_count(),reverse = True)
+            self.print_map(teams_sorted)
 
     def _fit_event(self, event, remaining_player_set):
         """
@@ -404,7 +435,7 @@ class GameState:
                     localized = True
                     remaining_players = self._world.players_near(source_team.location, event['radius'],
                             filter_func = lambda p: p.name in remaining_player_set)
-                    remaining_team_pool = sorted([self._teams[i] for i in set(p.team.id for p in remaining_players)], 
+                    remaining_team_pool = sorted([self._teams[i] for i in set(p.team.id for p in remaining_players)],
                                                     key=lambda t: (t.active_player_count(), t.id))
                 else:
                     team_idx = 0
@@ -426,7 +457,7 @@ class GameState:
                         i -= 1
 
                 remaining_players = list(filter(lambda p: p not in player_select, remaining_players))
-                
+
                 complement_filled = 0
                 for team_id, player_set in zip(teams_select, event['complement_list']):
                     filtered_player_pool = list(filter(lambda p: p.team.id != team_id, remaining_players))
