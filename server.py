@@ -19,7 +19,7 @@ from discord.ext import tasks, commands
 from typing import Union
 
 from game.game_state import GameState
-from draw import NORMAL_FONT
+from draw import NORMAL_FONT, break_text, render_text
 
 class DiscordBot():
     """
@@ -96,32 +96,40 @@ class DiscordBot():
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event_data):
-                        for event, event_type, players in event_data:
+                        ascent, descent = NORMAL_FONT.normal.getmetrics()
+                        line_height = ascent + descent
+                        image_size = 64
+
+                        batch_width = 500
+                        batch_height = 0
+                        # Tuple(y, images, text)
+                        render_batch = []
+                        dummy_image = Image.new(mode='RGBA', size=(1000, 50), color=(54, 57, 63))
+                        dummy_draw = ImageDraw.Draw(dummy_image)
+                        for idx, (event, event_type, players) in enumerate(event_data):
                             imagelist = [p.get_active_image() for p in players]
-                            image_size = 64
 
                             images_width = image_size*len(players)* 1.25 + image_size/4
                             result_height = round(image_size*1.25) + 5
 
-                            text_start_y = result_height
-                            event_raw_text = event['text'].format(*(p.name for p in players))
-                            text_horiz_chars = max(len(event_raw_text), 40)
-                            result_width = int(max(images_width, (text_horiz_chars + 2) *9.6))
+                            event_raw_text, n_lines = break_text(event['text'].format(*(f"\\*{p.name}\\*" for p in players)), dummy_draw, NORMAL_FONT, batch_width)
+                            print(event_raw_text)
 
-                            #TODO compute n_lines, and text, and draw bold/underline...
-                            n_lines = 1
-                            result_height += 16*n_lines
-                            text = event_raw_text
+                            result_height += line_height*n_lines
+                            render_batch.append((batch_height, imagelist, event_raw_text))
+                            batch_height += result_height
 
-                            result = Image.new(mode='RGBA', size=(result_width, result_height), color=(54, 57, 63))
-
-                            d = ImageDraw.Draw(result)
-                            d.multiline_text((5,text_start_y), text, font=NORMAL_FONT.normal, fill=(255, 255, 255))
-
-                            for i in range(len(imagelist)):
-                                result.paste(im=imagelist[i], box=(image_size * i + image_size // 4 * (i + 1), image_size // 4), mask=imagelist[i].convert('RGBA'))
-                            self.queue_message(result)
-                            #self.queue_message(event['text'].format(*(f"__**{p.name}**__" for p in players)))
+                            if len(render_batch) == 5 or idx == len(event_data) - 1:
+                                result = Image.new(mode='RGBA', size=(batch_width, batch_height), color=(54, 57, 63))
+                                d = ImageDraw.Draw(result)
+                                for y, images, text in render_batch:
+                                    text_start_y = y + round(image_size * 1.25) + 5
+                                    render_text(text, result, d, NORMAL_FONT, (0, text_start_y), (255,255,255))
+                                    for i, image  in enumerate(images):
+                                        result.paste(im=image, box=(int(i*image_size*1.25) + image_size//4, y+image_size // 4), mask=image.convert('RGBA'))
+                                self.queue_message(result)
+                                batch_height = 0
+                                render_batch = []
 
                     self._game.set_event_printer(player_highlighter)
         
@@ -136,6 +144,7 @@ class DiscordBot():
                     print('Starting turn')
                     self._game.turn()
                     self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+                    self.queue_message(self._game.print_map())
                 self._game_lock.release()
             else:
                 print('Game is busy! Try again soon...')
@@ -205,9 +214,6 @@ $player <playername> -- returns the statistics of a player
                         if buffered_msg_len > 1000:
                             await self._bind_channel.send('\n'.join(buffered_message))
                             buffered_message = []
-                        if sent_msgs >= 10:
-                            self._message_send_pause = True
-                            break
                     else:
                         if len(buffered_message) > 0:
                             await self._bind_channel.send('\n'.join(buffered_message))
@@ -219,6 +225,9 @@ $player <playername> -- returns the statistics of a player
                                 image_binary.seek(0)
                                 await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
                             sent_msgs += 1
+                    if sent_msgs >= 5:
+                        self._message_send_pause = True
+                        break
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:

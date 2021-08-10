@@ -328,7 +328,7 @@ class GameState:
         else:
             teams_copy = self._teams.copy()
             teams_sorted = sorted(teams_copy,key=lambda team: team.active_player_count(),reverse = True)
-            self.print_map(teams_sorted)
+            return self.print_map(teams_sorted)
 
     def _fit_event(self, event, remaining_player_set):
         """

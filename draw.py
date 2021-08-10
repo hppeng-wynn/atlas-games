@@ -48,12 +48,14 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
         elif content == FontFormat.ITALIC:
             continue
         split_points = content.replace('\n', ' ').split(' ')
-
+        
+        has_text = False
         while len(split_points):
-            if current_line == "":
-                tmp_line = split_points[0]
-            else:
+            if has_text:
                 tmp_line = current_line + ' ' + split_points[0]
+            else:
+                tmp_line = split_points[0]
+                has_text = True
             # Ignore height.
             pixel_width, _ = draw.textsize(tmp_line, font=active_fonts[bold_mode])
             if pixel_width + prev_length > max_width:
@@ -74,9 +76,10 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
                 current_line = tmp_line
                 split_points.pop(0)
         prev_text += current_line
+        current_line = ""
     if prev_text is not None:
         lines.append(prev_text)
-    return '\n'.join(lines)
+    return '\n'.join(lines), len(lines)
 
 def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos: Tuple[float, float] , color: Tuple[float, float, float] = (255,255,255)):
     """
@@ -98,7 +101,7 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
 
 
     for i in range(len(textlines)):
-        line_arr = [' ' if t is '' else t for t in format_tokenize(textlines[i])]
+        line_arr = format_tokenize(textlines[i])
         x_offset = 0
 
         buf = ''
@@ -130,11 +133,11 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
 
 def format_tokenize(text: str):
     """
-    Split text by space/newline, but also split out `FontFormat`s
+    Split out `FontFormat`s from the text.
     \\: \
-    \*: bold
-    \_: underline
-    \|: italic
+    \*: bold (begin/end)
+    \_: underline (begin/end)
+    \|: italic (Begin/end)
     """
     res = []
     cur = ""

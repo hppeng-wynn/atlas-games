@@ -1,9 +1,9 @@
 # Type annotations without import
 from __future__ import annotations
 
+import os
 if __name__ == "__main__":
     import sys
-    import os
     path = os.path.join(os.path.dirname(__file__), '..')
     sys.path.append(path)
 
@@ -11,11 +11,12 @@ from typing import List
 from PIL import Image, ImageDraw
 from draw import LARGE_FONT, break_text
 
+_src_dir = os.path.dirname(os.path.realpath(__file__))
 N_MARKER_MAX = 10;
 MARKER_WIDTH = 77;
 MARKER_HEIGHT = 77;
-TEAM_IMAGES = [Image.open(f"./resources/team{i}.png").resize((MARKER_WIDTH, MARKER_HEIGHT)).convert('RGBA') for i in range(N_MARKER_MAX)]
-MAP_IMAGE = Image.open("./resources/map.png").convert('RGBA')
+TEAM_IMAGES = [Image.open(_src_dir+f"/resources/team{i}.png").resize((MARKER_WIDTH, MARKER_HEIGHT)).convert('RGBA') for i in range(N_MARKER_MAX)]
+MAP_IMAGE = Image.open(_src_dir+"/resources/map.png").convert('RGBA')
 # scale things down.. too slow
 SCALE_FACTOR=2
 MAP_IMAGE = MAP_IMAGE.resize((int(MAP_IMAGE.size[0]/SCALE_FACTOR), int(MAP_IMAGE.size[1]/SCALE_FACTOR)))
@@ -37,7 +38,7 @@ def render_map(pois: List[Point], labels: List[str]):
     label_text_y = result_height
     label_text_max_height = 0
     for i, label in enumerate(labels):
-        txt = break_text(label, draw, LARGE_FONT, max_label_width)
+        txt, nlines = break_text(label, draw, LARGE_FONT, max_label_width)
         _, pixel_height = draw.textsize(txt, font=LARGE_FONT.normal)
         label_text_max_height = max(label_text_max_height, pixel_height)
         labels[i] = txt
