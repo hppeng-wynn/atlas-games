@@ -6,7 +6,8 @@ from game.players import Player, Team
 
 class World:
     """
-    Lol looks like this is gonna be a data class
+    Class representing a World. (a graph)
+    Holds info about the nodes and their connections, has some BFS routines.
     """
 
     def __init__(self, world_data: dict):
