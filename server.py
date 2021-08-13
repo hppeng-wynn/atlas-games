@@ -92,7 +92,7 @@ class DiscordBot():
             self._bind_channel = ctx.channel
             await ctx.send('Bound to '+ctx.channel.name)
 
-        @self._bot.command(name='newgame')
+        @self._bot.command(name='newgame', aliases=['ng'])
         async def newgame(ctx):
             if self._bind_channel is None:
                 await ctx.send('atlas-games needs to be bound to a channel first! Use $host')
@@ -139,7 +139,7 @@ class DiscordBot():
 
                     self._game.set_event_printer(player_highlighter)
         
-        @self._bot.command(name='next')
+        @self._bot.command(name='next', aliases=['n'])
         async def next_turn(ctx):
             if self._game_lock.acquire(blocking=False):
                 print('Got game lock')
@@ -156,12 +156,12 @@ class DiscordBot():
                 print('Game is busy! Try again soon...')
                 await ctx.send('Game is busy! Try again soon...')
         
-        @self._bot.command(name='resume')
+        @self._bot.command(name='resume', aliases=['r'])
         async def resume(ctx):
             print("Resuming printout")
             self._message_send_pause = False
         
-        @self._bot.command(name='player')
+        @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
             if self._game is None:
                 await ctx.send('No game is running! Start a new game with $newgame.')
