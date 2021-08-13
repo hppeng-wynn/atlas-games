@@ -244,7 +244,7 @@ $player <playername> -- returns the statistics of a player
             if self._message_send_pause:
                 if user.bot:
                     return
-                if reaction == ATLAS:
+                if reaction.emoji == ATLAS:
                     print("Resuming printout")
                     self._message_send_pause = False
 
