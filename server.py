@@ -188,9 +188,7 @@ $player <playername> -- returns the statistics of a player
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
-            if reaction.emoji == ATLAS:
-                print("Resuming printout")
-                self._message_send_pause = False
+            await reaction.message.add_reaction(reaction.emoji)
 
         @tasks.loop(seconds=1.0)
         async def loop():
@@ -238,9 +236,8 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    resume_message = await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
-                    await resume_message.add_reaction(ATLAS)
-        
+                    await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+
     def queue_message(self, content) -> bool:
         """
         Queue a new message to be sent by the bot.
