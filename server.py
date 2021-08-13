@@ -76,13 +76,15 @@ class DiscordBot():
                 print(f"Disconnecting bot running on port {port}")
                 await ctx.send(f"Disconnecting bot running on port {port}")
                 self.pause()
+            else:
+                await ctx.send(f"Wrong port. The bot is currently running on port {SERVER_PORT}")
                 
         @dc.error
         async def dc_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
-                await ctx.send('$dc PORT')
+                await ctx.send("`$dc <PORT>`")
             elif isinstance(error, commands.BadArgument):
-                await ctx.send('Please verify that PORT is an integer.')
+                await ctx.send('Please verify that `<PORT>` is an integer.')
         
         @self._bot.command(name='host')
         async def host(ctx):
