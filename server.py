@@ -73,7 +73,7 @@ class DiscordBot():
         @self._bot.command(name='dc')
         async def disconnect(ctx, port):
             try:
-                if port == SERVER_PORT:
+                if int(port) == SERVER_PORT:
                     print(f"Disconnecting bot running on port {port}")
                     await ctx.send(f"Disconnecting bot running on port {port}")
                     self.pause()
