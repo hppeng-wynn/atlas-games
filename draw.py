@@ -48,6 +48,7 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
         elif content == FontFormat.ITALIC:
             continue
         split_points = content.replace('\n', ' ').split(' ')
+        current_line = ""
         
         has_text = False
         while len(split_points):
@@ -76,7 +77,6 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
                 current_line = tmp_line
                 split_points.pop(0)
         prev_text += current_line
-        current_line = ""
     if prev_text is not None:
         lines.append(prev_text)
     return '\n'.join(lines), len(lines)
