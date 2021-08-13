@@ -78,14 +78,14 @@ class DiscordBot():
                 self.pause()
             else:
                 await ctx.send(f"Wrong port. The bot is currently running on port {SERVER_PORT}")
-                
+
         @dc.error
         async def dc_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
                 await ctx.send("`$dc <PORT>`")
             elif isinstance(error, commands.BadArgument):
                 await ctx.send('Please verify that `<PORT>` is an integer.')
-        
+
         @self._bot.command(name='host')
         async def host(ctx):
             print("$host: Wait for lock")
@@ -138,7 +138,7 @@ class DiscordBot():
                                 render_batch = []
 
                     self._game.set_event_printer(player_highlighter)
-        
+
         @self._bot.command(name='next', aliases=['n'])
         async def next_turn(ctx):
             if self._game_lock.acquire(blocking=False):
@@ -155,12 +155,12 @@ class DiscordBot():
             else:
                 print('Game is busy! Try again soon...')
                 await ctx.send('Game is busy! Try again soon...')
-        
+
         @self._bot.command(name='resume', aliases=['r'])
         async def resume(ctx):
             print("Resuming printout")
             self._message_send_pause = False
-        
+
         @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
             if self._game is None:
@@ -170,7 +170,7 @@ class DiscordBot():
                     await ctx.send(self._game.player_info(player_name))
                 except:
                     await ctx.send("`$player <playername>`")
-        
+
         @self._bot.command(name='help')
         async def help_menu(ctx):
             await ctx.send(
@@ -188,7 +188,11 @@ $player <playername> -- returns the statistics of a player
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
-            await reaction.message.add_reaction(reaction.emoji)
+            if user.bot:
+                return
+            if self._message_send_pause:
+                if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
+                    self._message_send_pause = False
 
         @tasks.loop(seconds=1.0)
         async def loop():
@@ -236,7 +240,8 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    resume_message = await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    await resume_message.add_reaction("▶️")
 
     def queue_message(self, content) -> bool:
         """
