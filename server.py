@@ -241,12 +241,9 @@ $player <playername> -- returns the statistics of a player
 
         @self._bot.event
         async def on_reaction_add(reaction,user):
-            if self._message_send_pause:
-                if user.bot:
-                    return
-                if reaction.emoji == ATLAS:
-                    print("Resuming printout")
-                    self._message_send_pause = False
+            if reaction.emoji == ATLAS:
+                print("Resuming printout")
+                self._message_send_pause = False
 
         
     def queue_message(self, content) -> bool:
