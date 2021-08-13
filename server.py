@@ -195,7 +195,6 @@ $player <playername> -- returns the statistics of a player
             """
             Loop function for the bot. Since I can't send messages from other threads
             (something about asyncio) using this as an in-between.
-
             For now: Reads messages out of the message queue (can be filled by other threads)
             and spits them out into the bound channel.
             """
@@ -237,12 +236,22 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    resume_message = await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    await resume_message.add_reaction(ATLAS)
 
+        @self._bot.event
+        async def on_reaction_add(reaction,user):
+            if self._message_send_pause:
+                if user.bot:
+                    return
+                if emoji == ATLAS:
+                    print("Resuming printout")
+                    self._message_send_pause = False
+
+        
     def queue_message(self, content) -> bool:
         """
         Queue a new message to be sent by the bot.
-
         Return: True on success, false if bot is not running.
         """
         if not self._running:
@@ -278,7 +287,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
     """
     Simple HTTP request handler. TODO: probably extend SimpleHTTPRequestHandler instead
     to allow easier html/js/css blargh
-
     For now the only endpoint of interest is /ping
         (sends a "Pong!" message to the bot's bound channel)
     """
@@ -286,7 +294,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         """
         Handle an HTTP GET request.
-
         @see https://docs.python.org/3/library/http.server.html
         (or google since this docs page is kinda bad)
         """
