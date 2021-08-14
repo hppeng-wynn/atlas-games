@@ -151,9 +151,9 @@ class DiscordBot():
                     self._game.turn()
                     self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
                     self.queue_message(self._game.print_map())
-                    next_day_message = await self._bind_channel.send('type `$next` or react ⏭️ to proceed to the next day')
-                    await next_day_message.add_reaction("⏭️")
                 self._game_lock.release()
+                next_day_message = await self._bind_channel.send('type `$next` or react ⏭️ to proceed to the next day')
+                await next_day_message.add_reaction("⏭️")
             else:
                 print('Game is busy! Try again soon...')
                 await ctx.send('Game is busy! Try again soon...')
@@ -172,7 +172,7 @@ class DiscordBot():
             if self._message_send_pause:
                 if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
                     await resume(context)
-                if reaction.emoji == "⏭️" and reaction.message.content.find("`$next") != -1:
+                if reaction.emoji == "⏭️" and reaction.message.content.find("`$next`") != -1:
                     await next_turn(context)
                     
         @self._bot.command(name='player', aliases=['p'])
