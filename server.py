@@ -164,7 +164,7 @@ class DiscordBot():
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
-            context = await self._bot.get_context(reaction)
+            context = await self._bot.get_context(reaction.message)
             if user.bot:
                 return
             if self._message_send_pause:
