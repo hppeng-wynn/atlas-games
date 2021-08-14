@@ -164,12 +164,14 @@ class DiscordBot():
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
+            context = await self._bot.get_context(reaction)
             if user.bot:
                 return
             if self._message_send_pause:
                 if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
-                    print("Resuming printout")
-                    self._message_send_pause = False
+                    await resume(context)
+                if reaction.emoji == "⏭️" and reaction.message.content.find("`$resume") != -1:
+                    await next_turn(context)
                     
         @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
@@ -241,8 +243,9 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    resume_message = await self._bind_channel.send('Paused sending messages -- type `$resume` or react to continue')
+                    resume_message = await self._bind_channel.send('Paused sending messages -- type `$resume` or react ▶️ to resume, type `$next` or react ⏭️ to proceed to the next day')
                     await resume_message.add_reaction("▶️")
+                    await resume_message.add_reaction("⏭️")
 
     def queue_message(self, content) -> bool:
         """
