@@ -161,6 +161,16 @@ class DiscordBot():
             print("Resuming printout")
             self._message_send_pause = False
 
+        @self._bot.event
+        async def on_reaction_add(reaction: discord.Reaction,
+                                  user: Union[discord.Member, discord.User]):
+            if user.bot:
+                return
+            if self._message_send_pause:
+                if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
+                    print("Resuming printout")
+                    self._message_send_pause = False
+                    
         @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
             if self._game is None:
@@ -184,15 +194,6 @@ $next -- starts the next day given that a game is already running
 $resume -- resume printing
 $player <playername> -- returns the statistics of a player
 ```''')
-
-        @self._bot.event
-        async def on_reaction_add(reaction: discord.Reaction,
-                                  user: Union[discord.Member, discord.User]):
-            if user.bot:
-                return
-            if self._message_send_pause:
-                if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
-                    self._message_send_pause = False
 
         @tasks.loop(seconds=1.0)
         async def loop():
@@ -240,7 +241,7 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    resume_message = await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    resume_message = await self._bind_channel.send('Paused sending messages -- type `$resume` or react to continue')
                     await resume_message.add_reaction("▶️")
 
     def queue_message(self, content) -> bool:
