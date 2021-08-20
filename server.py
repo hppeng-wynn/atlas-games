@@ -55,20 +55,14 @@ class DiscordBot():
 
         @self._bot.event
         async def on_message(message: discord.Message):
-            """
-            Callback triggered when a message is sent in a channel viewable by this bot.
-            """
-            if not self._running:
-                return
-
-            if message.author == self._bot.user:
-                return
-            print(f"Message recv: {message.content}")
-            await self._bot.process_commands(message)
 
         @self._bot.command(name='hello')
         async def hello(ctx):
             await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
+
+        @self._bot.command(name='github')
+        async def github(ctx):
+            await ctx.send("Testing github ")
 
         @self._bot.command(name='dc')
         async def dc(ctx, port: int):
@@ -165,14 +159,22 @@ class DiscordBot():
         @self._bot.event
         async def on_message(message):
             """
+            Callback triggered when a message is sent in a channel viewable by this bot.
             adds reactions to messages containing "`$next`" and "`$resume`"
             """
+            if not self._running:
+                return
+
             if message.author.bot:
                 return
             if "`$next`" in message.content:
                 await message.add_reaction("⏭️")
             if "`$resume`" in message.content:
                 await message.add_reaction("▶️")
+
+            if message.author == self._bot.user:
+                return
+
             await self._bot.process_commands(message)
 
         @self._bot.event
