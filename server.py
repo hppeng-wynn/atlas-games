@@ -57,7 +57,7 @@ class DiscordBot():
                     guild_id: int = guild.id
                     os.system(f"sh github_init.sh {guild_id}")
                     self._github_init = True
-                return f(ctx, *args, **kwargs)
+                return await f(ctx, *args, **kwargs)
             return wrapper
 
         @self._bot.event
