@@ -68,7 +68,11 @@ class GameState:
                 img_map[name_url_data[i][0]] = image
 
         name_url_data = []
-        for data in sorted(player_data, key = lambda d: d['name']):
+        keys = sorted(player_data.keys())
+        for k in keys:
+            data = player_data[k]
+            if 'active' in data and not data[active]:
+                continue
             name_url_data.append([data['name'], data.get('img', '')])
 
         num_players = len(name_url_data)
@@ -88,7 +92,11 @@ class GameState:
         # Players can start on the same team by specifying the "team" field, and that team will be named
         # Otherwise they start solo with an unnamed team.
         teams_by_name: Mapping[str, Team] = dict()      # Temp variable: Teams are associated with numeric ID instead of name.
-        for data in sorted(player_data, key = lambda d: d["name"]):
+        keys = sorted(player_data.keys())
+        for k in keys:
+            data = player_data[k]
+            if 'active' in data and not data[active]:
+                continue
             if "team" in data:
                 team_name = data["team"]
             else:

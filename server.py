@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from functools import wraps
+
 from emojis import ATLAS
 
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -21,6 +24,8 @@ from typing import Union
 from game.game_state import GameState
 from draw import NORMAL_FONT, break_text, render_text
 
+PLAYER_DAT_FILE = "atlas-games_store/players.json"
+
 class DiscordBot():
     """
     Class handling interactions with the discord bot.
@@ -38,11 +43,22 @@ class DiscordBot():
         self._bind_channel = None
         self._running = True
 
-        self._world_data = json.load(open("game/world_data.json", 'r'))
-        self._event_data = json.load(open("game/event_data.json", 'r'))
-        self._player_data = json.load(open("game/players_full.json", 'r'))
         self._game_lock = Lock()
         self._game = None
+        self._github_guild_id = None
+        self._github_init = False
+
+        def github_init(f):
+            @wraps(f)
+            def wrapper(ctx, *args, **kwargs):
+                if not self._github_init:
+                    #TODO error check
+                    guild = ctx.guild
+                    guild_id: int = guild.id
+                    os.system(f"sh github_init.sh {guild_id}")
+                    self._github_init = True
+                return f(ctx, *args, **kwargs)
+            return wrapper
 
         @self._bot.event
         async def on_ready():
@@ -56,6 +72,35 @@ class DiscordBot():
         @self._bot.command(name='hello')
         async def hello(ctx):
             await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
+
+        @github_init
+        @self._bot.command(name='register')
+        async def register(ctx):
+            player = ctx.author
+            player_id = str(player.id)
+            player_name = player.name
+            player_img = str(player.avatar_url)
+            player_obj = {
+                    "name": player_name,
+                    "img": player_img
+                    "active": True
+                }
+            with open(PLAYER_DAT_FILE, 'r') as player_file:
+                player_data = json.load(player_file)
+
+            player_data[player_id] = player_obj
+
+            with open(PLAYER_DAT_FILE, 'w') as write_file:
+                json.dump(player_data, write_file)
+            os.system(f"sh github_update.sh {ctx.guild.id}")
+
+        @github_init
+        @self._bot.command(name='listplayers')
+        async def listplayers(ctx):
+            with open(PLAYER_DAT_FILE, 'r') as player_file:
+                player_data = json.load(player_file)
+            for player in player_data.values()
+                queue_message(player["name"])
 
         @self._bot.command(name='github')
         async def github(ctx):
@@ -94,6 +139,9 @@ class DiscordBot():
             else:
                 await ctx.send('Starting a new round of atlas-games! Use $next to advance and $player to view player stats.')
                 with self._game_lock:
+                    self._world_data = json.load(open("game/world_data.json", 'r'))
+                    self._event_data = json.load(open("game/event_data.json", 'r'))
+                    self._player_data = json.load(open("PLAYER_DAT_FILE", 'r'))
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event_data):
@@ -255,7 +303,7 @@ $player <playername> -- returns the statistics of a player
                                 image_binary.seek(0)
                                 await self._bind_channel.send(file=discord.File(fp=image_binary, filename='content.png'))
                             sent_msgs += 1
-                    if sent_msgs >= 5:
+                    if sent_msgs >= 5 and not self._messages.empty():
                         self._message_send_pause = True
                         break
                 if len(buffered_message) > 0:
