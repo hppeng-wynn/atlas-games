@@ -6,4 +6,4 @@ git config --global user.email hppeng
 git branch $GUILD_ID
 git checkout $GUILD_ID
 git pull
-git push --set-upstream origin $GUILD_ID
+git push --set-upstream origin $GUILD_ID --force
