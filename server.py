@@ -73,6 +73,11 @@ class DiscordBot():
         async def hello(ctx):
             await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
 
+        @self._bot.command(name='github_nuke')
+        async def github_nuke(ctx):
+            os.system("sh github_nuke.sh")
+            await ctx.send(f"Nuked git repo")
+
         @github_init
         @self._bot.command(name='register')
         async def register(ctx):
@@ -101,14 +106,6 @@ class DiscordBot():
                 player_data = json.load(player_file)
             for player in player_data.values():
                 queue_message(player["name"])
-
-        @self._bot.command(name='github')
-        async def github(ctx):
-            guild = ctx.guild
-            if guild is not None:
-                guild_id: int = guild.id
-                os.system(f"sh github_test.sh {guild_id}")
-                await ctx.send(f"Testing github, guild_id={guild_id}")
 
         @self._bot.command(name='dc')
         async def dc(ctx, port: int):

@@ -8,3 +8,5 @@ bin/
 share/
 lib64
 pyenv.cfg
+token
+atlas-games_store/*
