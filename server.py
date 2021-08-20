@@ -99,7 +99,7 @@ class DiscordBot():
         async def listplayers(ctx):
             with open(PLAYER_DAT_FILE, 'r') as player_file:
                 player_data = json.load(player_file)
-            for player in player_data.values()
+            for player in player_data.values():
                 queue_message(player["name"])
 
         @self._bot.command(name='github')
