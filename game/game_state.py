@@ -95,7 +95,7 @@ class GameState:
         keys = sorted(player_data.keys())
         for k in keys:
             data = player_data[k]
-            if 'active' in data and not data[active]:
+            if 'active' in data and not data['active']:
                 continue
             if "team" in data:
                 team_name = data["team"]
