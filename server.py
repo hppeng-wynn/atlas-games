@@ -50,7 +50,7 @@ class DiscordBot():
 
         def github_init(f):
             @wraps(f)
-            def wrapper(ctx, *args, **kwargs):
+            async def wrapper(ctx, *args, **kwargs):
                 if not self._github_init:
                     #TODO error check
                     guild = ctx.guild
