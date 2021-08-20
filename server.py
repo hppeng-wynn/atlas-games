@@ -151,6 +151,7 @@ class DiscordBot():
                     self._game.turn()
                     self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
                     self.queue_message(self._game.print_map())
+                    self.queue_message("Day concluded --- type `$next` or react ⏭️ to continue")
                 self._game_lock.release()
             else:
                 print('Game is busy! Try again soon...')
@@ -160,18 +161,34 @@ class DiscordBot():
         async def resume(ctx):
             print("Resuming printout")
             self._message_send_pause = False
+        
+        @self._bot.event
+        async def on_message(message):
+            """
+            adds reactions to messages containing "`$next`" and "`$resume`"
+            """
+            if message.author.bot:
+                return
+            if "`$next`" in message.content:
+                await message.add_reaction("⏭️")
+            if "`$resume`" in message.content:
+                await message.add_reaction("▶️")
+            await self._bot.process_commands(message)
 
         @self._bot.event
         async def on_reaction_add(reaction: discord.Reaction,
                                   user: Union[discord.Member, discord.User]):
+            """
+            Activates "$next" and "$resume" via reactions
+            """                          
             context = await self._bot.get_context(reaction.message)
             if user.bot:
                 return
             if self._message_send_pause:
-                if reaction.emoji == "▶️" and reaction.message.content.find("`$resume`") != -1:
+                if reaction.emoji == "▶️" and ("`$resume`" in reaction.message.content):
                     await resume(context)
-#                 if reaction.emoji == "⏭️" and reaction.message.content.find("`$next`") != -1:
-#                     await next_turn(context)
+            if reaction.emoji == "⏭️" and ("`$next`" in reaction.message.content):
+                await next_turn(context)
                     
         @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
@@ -243,8 +260,7 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    resume_message = await self._bind_channel.send('Paused sending messages -- type `$resume` or react ▶️ to resume')
-                    await resume_message.add_reaction("▶️")
+                    await self._bind_channel.send('Paused sending messages -- type `$resume` or react ▶️ to resume')
 
     def queue_message(self, content) -> bool:
         """
