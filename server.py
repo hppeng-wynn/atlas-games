@@ -82,7 +82,7 @@ class DiscordBot():
             player_img = str(player.avatar_url)
             player_obj = {
                     "name": player_name,
-                    "img": player_img
+                    "img": player_img,
                     "active": True
                 }
             with open(PLAYER_DAT_FILE, 'r') as player_file:
