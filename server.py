@@ -78,8 +78,8 @@ class DiscordBot():
             os.system("sh github_nuke.sh")
             await ctx.send(f"Nuked git repo")
 
-        @github_init
         @self._bot.command(name='register')
+        @github_init
         async def register(ctx):
             player = ctx.author
             player_id = str(player.id)
@@ -99,8 +99,8 @@ class DiscordBot():
                 json.dump(player_data, write_file)
             os.system(f"sh github_update.sh {ctx.guild.id}")
 
-        @github_init
         @self._bot.command(name='listplayers')
+        @github_init
         async def listplayers(ctx):
             with open(PLAYER_DAT_FILE, 'r') as player_file:
                 player_data = json.load(player_file)

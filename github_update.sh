@@ -1,5 +1,5 @@
 GUILD_ID="$1"
-git checkout $GUILD_ID
+cd atlas-games_store
 git add -u
 git commit --amend -m "$(date)"
 git push --force
