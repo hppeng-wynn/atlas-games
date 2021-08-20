@@ -78,21 +78,21 @@ class DiscordBot():
                 self.pause()
             else:
                 await ctx.send(f"Wrong port. The bot is currently running on port {SERVER_PORT}")
-                
+
         @dc.error
         async def dc_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
                 await ctx.send("`$dc <PORT>`")
             elif isinstance(error, commands.BadArgument):
                 await ctx.send('Please verify that `<PORT>` is an integer.')
-        
+
         @self._bot.command(name='host')
         async def host(ctx):
             print("$host: Wait for lock")
             self._bind_channel = ctx.channel
             await ctx.send('Bound to '+ctx.channel.name)
 
-        @self._bot.command(name='newgame')
+        @self._bot.command(name='newgame', aliases=['ng'])
         async def newgame(ctx):
             if self._bind_channel is None:
                 await ctx.send('atlas-games needs to be bound to a channel first! Use $host')
@@ -138,8 +138,8 @@ class DiscordBot():
                                 render_batch = []
 
                     self._game.set_event_printer(player_highlighter)
-        
-        @self._bot.command(name='next')
+
+        @self._bot.command(name='next', aliases=['n'])
         async def next_turn(ctx):
             if self._game_lock.acquire(blocking=False):
                 print('Got game lock')
@@ -151,17 +151,46 @@ class DiscordBot():
                     self._game.turn()
                     self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
                     self.queue_message(self._game.print_map())
+                    self.queue_message("Day concluded --- type `$next` or react ⏭️ to continue")
                 self._game_lock.release()
             else:
                 print('Game is busy! Try again soon...')
                 await ctx.send('Game is busy! Try again soon...')
-        
-        @self._bot.command(name='resume')
+
+        @self._bot.command(name='resume', aliases=['r'])
         async def resume(ctx):
             print("Resuming printout")
             self._message_send_pause = False
         
-        @self._bot.command(name='player')
+        @self._bot.event
+        async def on_message(message):
+            """
+            adds reactions to messages containing "`$next`" and "`$resume`"
+            """
+            if message.author.bot:
+                return
+            if "`$next`" in message.content:
+                await message.add_reaction("⏭️")
+            if "`$resume`" in message.content:
+                await message.add_reaction("▶️")
+            await self._bot.process_commands(message)
+
+        @self._bot.event
+        async def on_reaction_add(reaction: discord.Reaction,
+                                  user: Union[discord.Member, discord.User]):
+            """
+            Activates "$next" and "$resume" via reactions
+            """                          
+            context = await self._bot.get_context(reaction.message)
+            if user.bot:
+                return
+            if self._message_send_pause:
+                if reaction.emoji == "▶️" and ("`$resume`" in reaction.message.content):
+                    await resume(context)
+            if reaction.emoji == "⏭️" and ("`$next`" in reaction.message.content):
+                await next_turn(context)
+                    
+        @self._bot.command(name='player', aliases=['p'])
         async def player_info(ctx, player_name):
             if self._game is None:
                 await ctx.send('No game is running! Start a new game with $newgame.')
@@ -170,7 +199,7 @@ class DiscordBot():
                     await ctx.send(self._game.player_info(player_name))
                 except:
                     await ctx.send("`$player <playername>`")
-        
+
         @self._bot.command(name='help')
         async def help_menu(ctx):
             await ctx.send(
@@ -185,17 +214,11 @@ $resume -- resume printing
 $player <playername> -- returns the statistics of a player
 ```''')
 
-        @self._bot.event
-        async def on_reaction_add(reaction: discord.Reaction,
-                                  user: Union[discord.Member, discord.User]):
-            await reaction.message.add_reaction(reaction.emoji)
-
         @tasks.loop(seconds=1.0)
         async def loop():
             """
             Loop function for the bot. Since I can't send messages from other threads
             (something about asyncio) using this as an in-between.
-
             For now: Reads messages out of the message queue (can be filled by other threads)
             and spits them out into the bound channel.
             """
@@ -237,12 +260,11 @@ $player <playername> -- returns the statistics of a player
                 if len(buffered_message) > 0:
                     await self._bind_channel.send('\n'.join(buffered_message))
                 if self._message_send_pause:
-                    await self._bind_channel.send('Paused sending messages -- `$resume` to continue')
+                    await self._bind_channel.send('Paused sending messages -- type `$resume` or react ▶️ to resume')
 
     def queue_message(self, content) -> bool:
         """
         Queue a new message to be sent by the bot.
-
         Return: True on success, false if bot is not running.
         """
         if not self._running:
@@ -278,7 +300,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
     """
     Simple HTTP request handler. TODO: probably extend SimpleHTTPRequestHandler instead
     to allow easier html/js/css blargh
-
     For now the only endpoint of interest is /ping
         (sends a "Pong!" message to the bot's bound channel)
     """
@@ -286,7 +307,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         """
         Handle an HTTP GET request.
-
         @see https://docs.python.org/3/library/http.server.html
         (or google since this docs page is kinda bad)
         """
