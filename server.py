@@ -105,7 +105,7 @@ class DiscordBot():
             with open(PLAYER_DAT_FILE, 'r') as player_file:
                 player_data = json.load(player_file)
             for player in player_data.values():
-                queue_message(player["name"])
+                self.queue_message(player["name"])
 
         @self._bot.command(name='dc')
         async def dc(ctx, port: int):
@@ -138,7 +138,7 @@ class DiscordBot():
                 with self._game_lock:
                     self._world_data = json.load(open("game/world_data.json", 'r'))
                     self._event_data = json.load(open("game/event_data.json", 'r'))
-                    self._player_data = json.load(open("PLAYER_DAT_FILE", 'r'))
+                    self._player_data = json.load(open(PLAYER_DAT_FILE, 'r'))
                     self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
 
                     def player_highlighter(this: GameState, event_data):
