@@ -63,7 +63,7 @@ class DiscordBot():
             if guild is not None:
                 guild_id: int = guild.id
                 os.system(f"sh github_test.sh {guild_id}")
-                await ctx.send("Testing github, guild_id={guild_id}")
+                await ctx.send(f"Testing github, guild_id={guild_id}")
 
         @self._bot.command(name='dc')
         async def dc(ctx, port: int):
