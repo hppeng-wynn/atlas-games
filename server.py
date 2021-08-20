@@ -98,6 +98,7 @@ class DiscordBot():
             with open(PLAYER_DAT_FILE, 'w') as write_file:
                 json.dump(player_data, write_file)
             os.system(f"sh github_update.sh {ctx.guild.id}")
+            await ctx.send(f"{player_name}, Registered succesfully!")
 
         @self._bot.command(name='listplayers')
         @github_init

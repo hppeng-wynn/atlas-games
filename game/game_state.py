@@ -71,7 +71,7 @@ class GameState:
         keys = sorted(player_data.keys())
         for k in keys:
             data = player_data[k]
-            if 'active' in data and not data[active]:
+            if 'active' in data and not data['active']:
                 continue
             name_url_data.append([data['name'], data.get('img', '')])
 
