@@ -48,6 +48,16 @@ class DiscordBot():
         self._github_guild_id = None
         self._github_init = False
 
+        def binding(f):
+            @wraps(f)
+            async def wrapper(ctx, *args, **kwargs):
+                if self._bind_channel is None:
+                    self._bind_channel = ctx.channel
+                    await ctx.send('Bound to '+ctx.channel.name)
+                return await f(ctx, *args, **kwargs)
+            return wrapper
+            
+
         def github_init(f):
             @wraps(f)
             async def wrapper(ctx, *args, **kwargs):
@@ -70,15 +80,18 @@ class DiscordBot():
             loop.start()
 
         @self._bot.command(name='hello')
+        @binding
         async def hello(ctx):
             await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
 
         @self._bot.command(name='github_nuke')
+        @binding
         async def github_nuke(ctx):
             os.system("sh github_nuke.sh")
             await ctx.send(f"Nuked git repo")
 
         @self._bot.command(name='register')
+        @binding
         @github_init
         async def register(ctx):
             player = ctx.author
@@ -101,6 +114,7 @@ class DiscordBot():
             await ctx.send(f"{player_name}, Registered succesfully!")
 
         @self._bot.command(name='listplayers')
+        @binding
         @github_init
         async def listplayers(ctx):
             with open(PLAYER_DAT_FILE, 'r') as player_file:
@@ -109,6 +123,7 @@ class DiscordBot():
                 self.queue_message(player["name"])
 
         @self._bot.command(name='dc')
+        @binding
         async def dc(ctx, port: int):
             if port == SERVER_PORT:
                 print(f"Disconnecting bot running on port {port}")
@@ -126,11 +141,11 @@ class DiscordBot():
 
         @self._bot.command(name='host')
         async def host(ctx):
-            print("$host: Wait for lock")
             self._bind_channel = ctx.channel
             await ctx.send('Bound to '+ctx.channel.name)
 
         @self._bot.command(name='newgame', aliases=['ng'])
+        @binding
         async def newgame(ctx):
             if self._bind_channel is None:
                 await ctx.send('atlas-games needs to be bound to a channel first! Use $host')
@@ -248,6 +263,7 @@ class DiscordBot():
                     await ctx.send("`$player <playername>`")
 
         @self._bot.command(name='help')
+        @binding
         async def help_menu(ctx):
             await ctx.send(
 f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
