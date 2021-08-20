@@ -167,8 +167,6 @@ class DiscordBot():
             """
             adds reactions to messages containing "`$next`" and "`$resume`"
             """
-            if message.author.bot:
-                return
             if "`$next`" in message.content:
                 await message.add_reaction("⏭️")
             if "`$resume`" in message.content:
