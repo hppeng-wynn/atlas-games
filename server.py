@@ -53,16 +53,17 @@ class DiscordBot():
             loop.self = self
             loop.start()
 
-        @self._bot.event
-        async def on_message(message: discord.Message):
-
         @self._bot.command(name='hello')
         async def hello(ctx):
             await ctx.send(f"Hello! I'm on port {SERVER_PORT}")
 
         @self._bot.command(name='github')
         async def github(ctx):
-            await ctx.send("Testing github ")
+            guild = ctx.guild
+            if guild is not None:
+                guild_id: int = guild.id
+                os.system(f"sh github_test.sh {guild_id}")
+                await ctx.send("Testing github, guild_id={guild_id}")
 
         @self._bot.command(name='dc')
         async def dc(ctx, port: int):
@@ -165,8 +166,6 @@ class DiscordBot():
             if not self._running:
                 return
 
-            if message.author.bot:
-                return
             if "`$next`" in message.content:
                 await message.add_reaction("⏭️")
             if "`$resume`" in message.content:
