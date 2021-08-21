@@ -146,6 +146,7 @@ class DiscordBot():
 
         @self._bot.command(name='newgame', aliases=['ng'])
         @binding
+        @github_init
         async def newgame(ctx):
             if self._bind_channel is None:
                 await ctx.send('atlas-games needs to be bound to a channel first! Use $host')
