@@ -202,18 +202,6 @@ class DiscordBot():
                 if self._game is None:
                     print('No game is running! Start a new game with $newgame.')
                     await ctx.send('No game is running! Start a new game with $newgame.')
-                elif self._game.get_num_alive_players() <= 1:
-                    if self._game.players:
-                        for player_name in self._game.players.keys():
-                            await ctx.send(f"The winner is **{player_name}**!")
-                            self._game = None
-                            self._message_send_pause = False
-                            self._game_lock.release()
-                    else:
-                        await ctx.send("What a tragedy! no winners this time around.")
-                        self._game = None
-                        self._message_send_pause = False
-                        self._game_lock.release()
                 else:
                     print('Starting turn')
                     self._game.turn()
