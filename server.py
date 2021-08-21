@@ -202,24 +202,28 @@ class DiscordBot():
                 if self._game is None:
                     print('No game is running! Start a new game with $newgame.')
                     await ctx.send('No game is running! Start a new game with $newgame.')
-                elif self._game.get_num_alive_players() <= 1:
-                    if self._game.players:
-                        for player_name in self._game.players.keys():
-                            await ctx.send(f"The winner is **{player_name}**!")
+                else:
+                    if self._game.get_num_alive_players() <= 1:
+                        if self._game.players:
+                            for player_name in self._game.players.keys():
+                                await ctx.send(f"The winner is **{player_name}**!")
+                                self._game = None
+                                self._message_send_pause = False
+                                self._game_lock.release()
+                                return
+                        else:
+                            await ctx.send("What a tragedy! no winners this time around.")
                             self._game = None
                             self._message_send_pause = False
                             self._game_lock.release()
-                    else:
-                        await ctx.send("What a tragedy! no winners this time around.")
-                        self._game = None
-                        self._message_send_pause = False
-                        self._game_lock.release()
-                else:
+                            return
                     print('Starting turn')
                     self._game.turn()
-                    self.queue_message(f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
+                    self.queue_message(
+                        f"Alive: {self._game.get_num_alive_players()}, Dead: {self._game.get_num_dead_players()}")
                     self.queue_message(self._game.print_map())
-                    self.queue_message("Day concluded --- type `$next` or react ⏭️ to continue")
+                    self.queue_message(
+                        "Day concluded --- type `$next` or react ⏭️ to continue")
                 self._game_lock.release()
             else:
                 print('Game is busy! Try again soon...')
