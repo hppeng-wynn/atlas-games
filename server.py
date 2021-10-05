@@ -118,8 +118,8 @@ class DiscordBot():
             loop.start()
 
         def simplify_item(item):
-            keys = ["id", "", "tier", "type", "str", "dex", "int", "def", "agi",  "strReq", "dexReq", "intReq", "defReq", "agiReq"]
-            simplified_item = {key: item[key] for key in keys}
+            keys = ["id", "tier", "type", "str", "dex", "int", "def", "agi",  "strReq", "dexReq", "intReq", "defReq", "agiReq"]
+            simplified_item = {key: item.get(key, 0) for key in keys}
             simplified_item["name"] = get_name(item)
             return simplified_item
 
@@ -148,16 +148,18 @@ class DiscordBot():
             wb_hash = wb_hash[start_idx:]
             skillpoint_info = wb_hash[:10]
             for i in range(5):
-                skillpoints[i] = toIntSigned(skillpoint_info[i*2:i*2+2])
+                skillpoints[i] = toIntSigned(skillpoint_info[i+i:i+i+2])
 
             build = {"equips": equips, "sp": skillpoints}
             self.current_entry = {"build": build, "add": None, "pops": []}
-            await ctx.send("Set build: " + str([e['name'] for e in self.current_entry]))
+            await ctx.send("Set build: " + str([e['name'] for e in equips]))
 
         @build.error
         async def build_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
                 await ctx.send("`$build <wynnbuilder_url>`")
+            else:
+                await ctx.send(str(error))
 
         @self._bot.command(name='add')
         async def add(ctx, item_name: str):
@@ -215,13 +217,15 @@ class DiscordBot():
             if skillpoint not in skillpoints:
                 await ctx.send("Invalid skillpoint, pick from " + str(skillpoints))
                 return
-            self.current_entry["pops"].append(slot, skillpoint)
+            self.current_entry["pops"].append((slot, skillpoint))
             await ctx.send(f"Added pop ({slot}, {skillpoint})")
 
         @pop.error
         async def pop_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
                 await ctx.send("`$pop <slot_ignorecase> <skillpoint_ignorecase>`")
+            else:
+                await ctx.send(str(error))
 
         @self._bot.command(name='save')
         async def save(ctx):
