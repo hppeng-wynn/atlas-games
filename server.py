@@ -139,13 +139,13 @@ class DiscordBot():
             start_idx = 0
             for i in range(len(equips)):
                 equipment_str = wb_hash[start_idx:start_idx+3]
+                start_idx += 3;
                 item_id = toInt(equipment_str)
                 if item_id not in self.id_map:
                     equips[i] = {"id": -1, "name": "No "+slots[i]}
                     continue
                 item = self.id_map[item_id]
                 equips[i] = simplify_item(item)
-                start_idx += 3;
             wb_hash = wb_hash[start_idx:]
             skillpoint_info = wb_hash[:10]
             for i in range(5):
