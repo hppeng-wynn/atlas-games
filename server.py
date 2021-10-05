@@ -241,12 +241,12 @@ class DiscordBot():
                         await ctx.send("Invalid slot for " + item["name"])
                         return
                         
+                    old_item = self.current_entry["build"]["equips"][slot_idx[slot]]
                     for i, (loss, gain) in enumerate(zip(old_item['sp'], item['sp'])):
                         self.current_entry["build"]["sp"] -= loss
                         self.current_entry["build"]["sp"] += gain
-                    old_item = self.current_entry["build"]["equips"][slot_idx[slot]]["name"]
                     self.current_entry["build"]["equips"][slot_idx[slot]] = item
-                    await ctx.send(f"replaced {old_item} with {item['name']}")
+                    await ctx.send(f"replaced {old_item['name']} with {item['name']}")
                     return
             await ctx.send("Item not found")
 
