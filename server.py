@@ -573,7 +573,9 @@ class RequestHandler(SimpleHTTPRequestHandler):
                     val = '["'+'", "'.join(build['equips'][:-1])+'"]' + str(build['skillpoints']) + ' + ' + entry['add']['name'] + '->'
                     val += ', '.join(build['pops'])
                     entries.append(val)
+                print(entries)
                 message = '\n'.join(sorted(entries))
+                print(message)
             else:
                 message = "/api/help"
             self.wfile.write(bytes(message, "utf8"))
