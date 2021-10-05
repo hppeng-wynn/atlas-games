@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from functools import wraps
 import json
 
@@ -105,6 +106,10 @@ class DiscordBot():
                     os.system("sh github_init.sh research")
                     self._github_init = True
                     self.research_mode = True
+                    with open(PLAYER_DAT_FILE, 'r') as build_file:
+                        self.build_data = json.load(build_file)
+                    if "id" not in self.build_data:
+                        self.build_data = {"id": 0, "builds": {}}
                 return await f(ctx, *args, **kwargs)
             return wrapper
 
@@ -117,10 +122,17 @@ class DiscordBot():
             loop.self = self
             loop.start()
 
+        skillpoint_order = ["str", "dex", "int", "def", "agi"]
         def simplify_item(item):
-            keys = ["id", "tier", "type", "str", "dex", "int", "def", "agi",  "strReq", "dexReq", "intReq", "defReq", "agiReq"]
-            simplified_item = {key: item.get(key, 0) for key in keys}
+            keys = ["id", "tier", "type"]
+            simplified_item = {key: item[key] for key in keys}
             simplified_item["name"] = get_name(item)
+            simplified_item["type"] = simplified_item["type"].lower()
+            simplified_item["sp"] = []
+            simplified_item["req"] = []
+            for sp in skillpoint_order:
+                simplified_item["sp"].append(item.get(sp, 0))
+                simplified_item["req"].append(item.get(sp+"Req", 0))
             return simplified_item
 
         def get_name(item):
@@ -128,12 +140,31 @@ class DiscordBot():
                 return item["displayName"]
             return item["name"]
 
+
+        alias_list = (("boots", "boot"),
+                    ("leggings", "legs", "leg"),
+                    ("chestplate", "chest", "cp"),
+                    ("helmet", "helm"),
+                    ("ring1", "r1"),
+                    ("ring2", "r2"),
+                    ("bracelet", "brace"),
+                    ("necklace", "neck"))
+        def abbreviate_slot(slot):
+            slot = slot.lower()
+            for dat in alias_list:
+                if dat[0] == slot:
+                    return slot
+                for alias in dat[1:]:
+                    if alias == slot:
+                        return dat[0]
+            return slot
+
+        default_slots = ["No "+x for x in ["Helmet", "Chestplate", "Leggings", "Boots", "Ring 1", "Ring 2", "Bracelet", "Necklace", "Weapon"]]
         @self._bot.command(name='build')
         @github_init_research
         async def build(ctx, url: str):
             wb_hash = url.split('_')[1]
             equips = [None]*9
-            slots = ["Helmet", "Chestplate", "Leggings", "Boots", "Ring 1", "Ring 2", "Bracelet", "Necklace", "Weapon"]
             skillpoints = [0]*5
             # Hard coded to v5 protocol
             start_idx = 0
@@ -142,7 +173,7 @@ class DiscordBot():
                 start_idx += 3;
                 item_id = toInt(equipment_str)
                 if item_id not in self.id_map:
-                    equips[i] = {"id": -1, "name": "No "+slots[i]}
+                    equips[i] = {"id": -1, "name": default_slots[i]}
                     continue
                 item = self.id_map[item_id]
                 equips[i] = simplify_item(item)
@@ -152,7 +183,7 @@ class DiscordBot():
                 skillpoints[i] = toIntSigned(skillpoint_info[i+i:i+i+2])
 
             build = {"equips": equips, "sp": skillpoints}
-            self.current_entry = {"build": build, "add": None, "pops": []}
+            self.current_entry = {"build": build, "add": None, "pops": [], "id": self.build_data["id"]}
             await ctx.send("Set build: " + str([e['name'] for e in equips]))
 
         @build.error
@@ -162,16 +193,110 @@ class DiscordBot():
             else:
                 await ctx.send(str(error))
 
+        @self._bot.command(name='copy')
+        @github_init_research
+        async def copy(ctx, entry_id: int):
+            if str(entry_id) in self.build_data["builds"]:
+                self.current_entry = deepcopy(self.build_data["builds"][str(entry_id)])
+                self.current_entry["id"] = self.build_data["id"]
+                await ctx.send("Copy build: " + str([e['name'] for e in self.current_entry["build"]["equips"]]))
+            else:
+                await ctx.send("Build ID not found, check summary")
+
+        @copy.error
+        async def copy_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$copy <build_id>`")
+            else:
+                await ctx.send(str(error))
+
+        @self._bot.command(name='edit')
+        @github_init_research
+        async def edit(ctx, entry_id: int):
+            if str(entry_id) in self.build_data["builds"]:
+                self.current_entry = deepcopy(self.build_data["builds"][str(entry_id)])
+                await ctx.send("Load build: " + str([e['name'] for e in self.current_entry["build"]["equips"]]))
+            else:
+                await ctx.send("Build ID not found, check summary")
+
+        @edit.error
+        async def edit_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$edit <build_id>`")
+            else:
+                await ctx.send(str(error))
+
+        slot_idx = {"helmet":0, "chestplate":1, "leggings":2, "boots":3, "ring1":4, "ring2":5, "bracelet":6, "necklace":7}
+        @self._bot.command(name='replace')
+        async def replace(ctx, slot: str, item_name: str):
+            if self.current_entry is None:
+                await ctx.send("Set a build first with `$build`")
+                return
+            slot = abbreviate_slot(slot)
+            item_name = item_name.lower()
+            for item in self.id_map.values():
+                if get_name(item).lower() == item_name:
+                    item = simplify_item(item)
+                    if not slot.startswith(item['type']):   # Jank workaround for ring1 ring2
+                        await ctx.send("Invalid slot for " + item["name"])
+                        return
+                        
+                    for i, (loss, gain) in enumerate(zip(old_item['sp'], item['sp'])):
+                        self.current_entry["build"]["sp"] -= loss
+                        self.current_entry["build"]["sp"] += gain
+                    old_item = self.current_entry["build"]["equips"][slot_idx[slot]]["name"]
+                    self.current_entry["build"]["equips"][slot_idx[slot]] = item
+                    await ctx.send(f"replaced {old_item} with {item['name']}")
+                    return
+            await ctx.send("Item not found")
+
+        @replace.error
+        async def replace_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$replace <slot_ignorecase> <item_name_ignorecase>`")
+            else:
+                await ctx.send(str(error))
+
+        @self._bot.command(name='remove')
+        async def remove(ctx, slot: str):
+            if self.current_entry is None:
+                await ctx.send("Set a build first with `$build`")
+                return
+            slot = abbreviate_slot(slot)
+            old_item = self.current_entry["build"]["equips"][slot_idx[slot]]
+            for i, loss in enumerate(old_item['sp']):
+                self.current_entry["build"]["sp"] -= loss
+            self.current_entry["build"]["equips"][slot_idx[slot]] = {"id": -1, "name": default_slots[slot_idx[slot]]}
+            await ctx.send(f"removed {slot} ({old_item['name']})")
+
+        @remove.error
+        async def remove_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$remove <slot_ignorecase>`")
+            else:
+                await ctx.send(str(error))
+
+        @self._bot.command(name='status')
+        async def status(ctx):
+            if self.current_entry is None:
+                await ctx.send("No active build")
+                return
+            await ctx.send("Build: " + str([e['name'] for e in self.current_entry["build"]["equips"]])
+                            + "\nAdd: " + ("null" if self.current_entry["add"] is None else self.current_entry["add"]["name"])
+                            + "\nPops: " + ",".join(str(pop) for pop in self.current_entry["pops"])
+                            + f"\nID: {self.current_entry['id']}")
+
         @self._bot.command(name='add')
         async def add(ctx, item_name: str):
             if self.current_entry is None:
                 await ctx.send("Set a build first with `$build`")
                 return
+            item_name = item_name.lower()
             for item in self.id_map.values():
-                if get_name(item).lower() == item_name.lower():
+                if get_name(item).lower() == item_name:
                     self.current_entry["add"] = simplify_item(item)
                     self.current_entry["pops"] = []
-                    await ctx.send("Set add item, reset pops")
+                    await ctx.send("Set add item ("+item['name']+"), reset pops")
                     return
             await ctx.send("Item not found")
 
@@ -179,47 +304,30 @@ class DiscordBot():
         async def add_error(ctx, error):
             if isinstance(error, commands.MissingRequiredArgument):
                 await ctx.send("`$add <item_name_ignorecase>`")
+            else:
+                await ctx.send(str(error))
 
         @self._bot.command(name='pop')
-        async def pop(ctx, slot: str, skillpoint: str):
+        async def pop(ctx, skillpoint: str, *pop_slots):
             if self.current_entry is None:
                 await ctx.send("Set a build first with `$build`")
                 return
             if self.current_entry["add"] is None:
                 await ctx.send("Set the added item first with `$add`")
                 return
-            slot = slot.lower()
-            alias_list = (("boots", "boot"),
-                        ("leggings", "legs", "leg"),
-                        ("chestplate", "chest", "cp"),
-                        ("helmet", "helm"),
-                        ("ring1", "r1"),
-                        ("ring2", "r2"),
-                        ("bracelet", "brace"),
-                        ("necklace", "neck"))
-            alias_map = {}
-            for dat in alias_list:
-                if dat[0] == slot:
-                    break
-                done = False
-                for alias in dat[1:]:
-                    if alias == slot:
-                        slot = dat[0]
-                        done = True
-                        break
-                if done:
-                    break
-            slots = ["boots", "leggings", "chestplate", "helmet", "ring1", "ring2", "bracelet", "necklace"]
-            if slot not in slots:
-                await ctx.send("Invalid slot, pick from " + str(slots))
-                return
             skillpoint = skillpoint.lower()
             skillpoints = ["str", "dex", "int", "def", "agi"]
             if skillpoint not in skillpoints:
                 await ctx.send("Invalid skillpoint, pick from " + str(skillpoints))
                 return
-            self.current_entry["pops"].append((slot, skillpoint))
-            await ctx.send(f"Added pop ({slot}, {skillpoint})")
+            pop_slots = [abbreviate_slot(slot) for slot in pop_slots]
+            slots = ["boots", "leggings", "chestplate", "helmet", "ring1", "ring2", "bracelet", "necklace"]
+            for slot in pop_slots:
+                if slot not in slots:
+                    await ctx.send(f"Invalid slot {slot}, pick from f{slots}")
+                    return
+                self.current_entry["pops"].append((slot, skillpoint))
+            await ctx.send(f"Added pops ({pop_slots}, {skillpoint})")
 
         @pop.error
         async def pop_error(ctx, error):
@@ -230,17 +338,14 @@ class DiscordBot():
 
         @self._bot.command(name='save')
         async def save(ctx):
-            with open(PLAYER_DAT_FILE, 'r') as build_file:
-                build_data = json.load(build_file)
-            if not isinstance(build_data, list):
-                build_data = []
-            build_data.append(self.current_entry)
+            self.build_data["builds"][str(self.current_entry["id"])] = deepcopy(self.current_entry)
+            self.build_data["id"] += 1
             with open(PLAYER_DAT_FILE, 'w') as write_file:
-                json.dump(build_data, write_file)
+                json.dump(self.build_data, write_file)
             os.system(f"sh github_update.sh research")
-            self.current_entry["add"] = None
-            self.current_entry["pops"] = []
-            await ctx.send("Saved data (cleared add and pops)")
+            saved_id = self.current_entry["id"]
+            self.current_entry = None
+            await ctx.send(f"Saved build id {saved_id}")
 
         @self._bot.command(name='hello')
         @binding
@@ -565,13 +670,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
             elif path == "status":
                 message = "Running status: " + str(BOT_OBJ.is_running())
             elif path == "summary" and BOT_OBJ.research_mode:
-                with open(PLAYER_DAT_FILE, 'r') as build_file:
-                    build_data = json.load(build_file)
                 entries = []
-                for entry in build_data:
+                for entry in BOT_OBJ.build_data["builds"].values():
                     build = entry["build"]
-                    val = '["'+'", "'.join(item['name'] for item in build['equips'][:-1])+'"]' + str(build['sp']) + ' + ' + entry['add']['name'] + '->'
-                    val += ', '.join(str(e) for e in entry['pops'])
+                    val = '['+', '.join(item['name'] for item in build['equips'][:-1])+']' + str(build['sp']) + ' + ' + entry['add']['name'] + ' >> '
+                    val += ', '.join(e[0] for e in entry['pops']) + f" ({entry['id']})"
                     entries.append(val)
                 message = '<br>'.join(sorted(entries))
             else:
