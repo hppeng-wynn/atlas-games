@@ -133,7 +133,7 @@ class DiscordBot():
         async def build(ctx, url: str):
             wb_hash = url.split('_')[1]
             equips = [None]*9
-            slots = ["Helmet", "Chestplate", "Leggings", "Boots", "Ring 1", "Ring 2", "Bracelet", "Necklace"]
+            slots = ["Helmet", "Chestplate", "Leggings", "Boots", "Ring 1", "Ring 2", "Bracelet", "Necklace", "Weapon"]
             skillpoints = [0]*5
             # Hard coded to v5 protocol
             start_idx = 0
@@ -570,7 +570,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 entries = []
                 for entry in build_data:
                     build = entry["build"]
-                    val = '["'+'", "'.join(build['equips'])+'"]' + str(build['skillpoints']) + ' + ' + entry['add']['name'] + '->'
+                    val = '["'+'", "'.join(build['equips'][:-1])+'"]' + str(build['skillpoints']) + ' + ' + entry['add']['name'] + '->'
                     val += ', '.join(build['pops'])
                     entries.append(val)
                 message = '\n'.join(sorted(entries))
