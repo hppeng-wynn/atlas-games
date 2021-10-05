@@ -133,6 +133,7 @@ class DiscordBot():
         async def build(ctx, url: str):
             wb_hash = url.split('_')[1]
             equips = [None]*9
+            slots = ["Helmet", "Chestplate", "Leggings", "Boots", "Ring 1", "Ring 2", "Bracelet", "Necklace"]
             skillpoints = [0]*5
             # Hard coded to v5 protocol
             start_idx = 0
@@ -140,7 +141,7 @@ class DiscordBot():
                 equipment_str = wb_hash[start_idx:start_idx+3]
                 item_id = toInt(equipment_str)
                 if item_id not in self.id_map:
-                    equips[i] = {"id": -1, "name": "No Item"}
+                    equips[i] = {"id": -1, "name": "No "+slots[i]}
                     continue
                 item = self.id_map[item_id]
                 equips[i] = simplify_item(item)
@@ -235,7 +236,7 @@ class DiscordBot():
                 build_data = []
             build_data.append(self.current_entry)
             with open(PLAYER_DAT_FILE, 'w') as write_file:
-                json.dump(build_data, write_file, indent=4)
+                json.dump(build_data, write_file)
             os.system(f"sh github_update.sh research")
             self.current_entry["add"] = None
             self.current_entry["pops"] = []
@@ -563,6 +564,16 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 BOT_OBJ.pause()
             elif path == "status":
                 message = "Running status: " + str(BOT_OBJ.is_running())
+            elif path == "summary" and BOT_OBJ.research_mode:
+                with open(PLAYER_DAT_FILE, 'r') as build_file:
+                    build_data = json.load(build_file)
+                entries = []
+                for entry in build_data:
+                    build = entry["build"]
+                    val = '["'+'", "'.join(build['equips'])+'"]' + str(build['skillpoints']) + ' + ' + entry['add']['name'] + '->'
+                    val += ', '.join(build['pops'])
+                    entries.append(val)
+                message = '\n'.join(sorted(entries))
             else:
                 message = "/api/help"
             self.wfile.write(bytes(message, "utf8"))
