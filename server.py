@@ -347,6 +347,25 @@ class DiscordBot():
             self.current_entry = None
             await ctx.send(f"Saved build id {saved_id}")
 
+        @self._bot.command(name='delete')
+        async def delete(ctx, build_id: int):
+            if build_id not in self.build_data:
+                await ctx.send(f"No such build: {build_id}")
+                return
+
+            del self.build_data[build_id]
+            with open(PLAYER_DAT_FILE, 'w') as write_file:
+                json.dump(self.build_data, write_file)
+            os.system(f"sh github_update.sh research")
+            await ctx.send(f"Deleted build id {build_id}")
+
+        @delete.error
+        async def delete_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$delete <build_id>`")
+            else:
+                await ctx.send(str(error))
+
         @self._bot.command(name='hello')
         @binding
         async def hello(ctx):
