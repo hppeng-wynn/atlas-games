@@ -48,6 +48,27 @@ class DiscordBot():
         self._github_guild_id = None
         self._github_init = False
 
+        item_dat = requests.get("https://wynnbuilder.github.io/compress.json")
+        self.id_map = {}
+        for item in item_dat["items"]:
+            self.id_map[item["id"] == item]
+        self.current_entry = None
+        b64_digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-"
+        self.b64_reverse = {c: i for i, c in enumerate(b64_digits)}
+
+        def toInt(digits):
+            result = 0;
+            for digit in digits:
+                result = (result << 6) + self.b64_reverse[digit]
+            return result
+        def toIntSigned(digits):
+            result = 0;
+            if self.b64_reverse[digits[0]] & 0x20:
+                result = -1
+            for digit in digits:
+                result = (result << 6) + self.b64_reverse[digit]
+            return result
+
         def binding(f):
             @wraps(f)
             async def wrapper(ctx, *args, **kwargs):
@@ -78,6 +99,32 @@ class DiscordBot():
             print('We have logged in as {0.user}'.format(self._bot))
             loop.self = self
             loop.start()
+
+        @self._bot.command(name='hello')
+        @binding
+        async def build(ctx, url: str):
+            wb_hash = url.split('_')[1]
+            equips = [None]*9
+            skillpoints = [0]*5
+            # Hard coded to v5 protocol
+            start_idx = 0
+            for i in range(len(equips)):
+                equipment_str = wb_hash[start_idx:start_idx+3]
+                item = id_map[toInt(equipment_str)]
+                if "displayName" in item:
+                    item_name = item["displayName"]
+                else:
+                    item_name = item["name"]
+                equipment[i] = (item["id"], item_name)
+                start_idx += 3;
+            wb_hash = wb_hash[start_idx:]
+            skillpoint_info = wb_hash[:10]
+            for i in range(5):
+                skillpoints[i] = toIntSigned(skillpoint_info.slice(i*2,i*2+2))
+
+            build = {"equips": equipment, "sp": skillpoints}
+            current_entry = {"build": build, "add": None, "events": []}
+            await ctx.send(str(current_entry))
 
         @self._bot.command(name='hello')
         @binding
