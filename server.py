@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from functools import wraps
+import json
+
+import requests
 
 from emojis import ATLAS
 
@@ -48,13 +51,14 @@ class DiscordBot():
         self._github_guild_id = None
         self._github_init = False
 
-        item_dat = requests.get("https://wynnbuilder.github.io/compress.json")
+        item_dat = json.loads(requests.get("https://wynnbuilder.github.io/compress.json").text)
         self.id_map = {}
         for item in item_dat["items"]:
-            self.id_map[item["id"] == item]
+            self.id_map[item["id"]] = item
         self.current_entry = None
         b64_digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-"
         self.b64_reverse = {c: i for i, c in enumerate(b64_digits)}
+        self.research_mode = False
 
         def toInt(digits):
             result = 0;
@@ -72,12 +76,13 @@ class DiscordBot():
         def binding(f):
             @wraps(f)
             async def wrapper(ctx, *args, **kwargs):
+                if self.research_mode:
+                    return
                 if self._bind_channel is None:
                     self._bind_channel = ctx.channel
                     await ctx.send('Bound to '+ctx.channel.name)
                 return await f(ctx, *args, **kwargs)
             return wrapper
-            
 
         def github_init(f):
             @wraps(f)
@@ -91,6 +96,18 @@ class DiscordBot():
                 return await f(ctx, *args, **kwargs)
             return wrapper
 
+        def github_init_research(f):
+            @wraps(f)
+            async def wrapper(ctx, *args, **kwargs):
+                if not self._github_init:
+                    #TODO error check
+                    guild = ctx.guild
+                    os.system("sh github_init.sh research")
+                    self._github_init = True
+                    self.research_mode = True
+                return await f(ctx, *args, **kwargs)
+            return wrapper
+
         @self._bot.event
         async def on_ready():
             """
@@ -100,8 +117,19 @@ class DiscordBot():
             loop.self = self
             loop.start()
 
-        @self._bot.command(name='hello')
-        @binding
+        def simplify_item(item):
+            keys = ["id", "", "tier", "type", "str", "dex", "int", "def", "agi",  "strReq", "dexReq", "intReq", "defReq", "agiReq"]
+            simplified_item = {key: item[key] for key in keys}
+            simplified_item["name"] = get_name(item)
+            return simplified_item
+
+        def get_name(item):
+            if "displayName" in item:
+                return item["displayName"]
+            return item["name"]
+
+        @self._bot.command(name='build')
+        @github_init_research
         async def build(ctx, url: str):
             wb_hash = url.split('_')[1]
             equips = [None]*9
@@ -110,21 +138,104 @@ class DiscordBot():
             start_idx = 0
             for i in range(len(equips)):
                 equipment_str = wb_hash[start_idx:start_idx+3]
-                item = id_map[toInt(equipment_str)]
-                if "displayName" in item:
-                    item_name = item["displayName"]
-                else:
-                    item_name = item["name"]
-                equipment[i] = (item["id"], item_name)
+                item_id = toInt(equipment_str)
+                if item_id not in self.id_map:
+                    equips[i] = {"id": -1, "name": "No Item"}
+                    continue
+                item = self.id_map[item_id]
+                equips[i] = simplify_item(item)
                 start_idx += 3;
             wb_hash = wb_hash[start_idx:]
             skillpoint_info = wb_hash[:10]
             for i in range(5):
-                skillpoints[i] = toIntSigned(skillpoint_info.slice(i*2,i*2+2))
+                skillpoints[i] = toIntSigned(skillpoint_info[i*2:i*2+2])
 
-            build = {"equips": equipment, "sp": skillpoints}
-            current_entry = {"build": build, "add": None, "events": []}
-            await ctx.send(str(current_entry))
+            build = {"equips": equips, "sp": skillpoints}
+            self.current_entry = {"build": build, "add": None, "pops": []}
+            await ctx.send("Set build: " + str([e['name'] for e in self.current_entry]))
+
+        @build.error
+        async def build_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$build <wynnbuilder_url>`")
+
+        @self._bot.command(name='add')
+        async def add(ctx, item_name: str):
+            if self.current_entry is None:
+                await ctx.send("Set a build first with `$build`")
+                return
+            for item in self.id_map.values():
+                if get_name(item).lower() == item_name.lower():
+                    self.current_entry["add"] = simplify_item(item)
+                    self.current_entry["pops"] = []
+                    await ctx.send("Set add item, reset pops")
+                    return
+            await ctx.send("Item not found")
+
+        @add.error
+        async def add_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$add <item_name_ignorecase>`")
+
+        @self._bot.command(name='pop')
+        async def pop(ctx, slot: str, skillpoint: str):
+            if self.current_entry is None:
+                await ctx.send("Set a build first with `$build`")
+                return
+            if self.current_entry["add"] is None:
+                await ctx.send("Set the added item first with `$add`")
+                return
+            slot = slot.lower()
+            alias_list = (("boots", "boot"),
+                        ("leggings", "legs", "leg"),
+                        ("chestplate", "chest", "cp"),
+                        ("helmet", "helm"),
+                        ("ring1", "r1"),
+                        ("ring2", "r2"),
+                        ("bracelet", "brace"),
+                        ("necklace", "neck"))
+            alias_map = {}
+            for dat in alias_list:
+                if dat[0] == slot:
+                    break
+                done = False
+                for alias in dat[1:]:
+                    if alias == slot:
+                        slot = dat[0]
+                        done = True
+                        break
+                if done:
+                    break
+            slots = ["boots", "leggings", "chestplate", "helmet", "ring1", "ring2", "bracelet", "necklace"]
+            if slot not in slots:
+                await ctx.send("Invalid slot, pick from " + str(slots))
+                return
+            skillpoint = skillpoint.lower()
+            skillpoints = ["str", "dex", "int", "def", "agi"]
+            if skillpoint not in skillpoints:
+                await ctx.send("Invalid skillpoint, pick from " + str(skillpoints))
+                return
+            self.current_entry["pops"].append(slot, skillpoint)
+            await ctx.send(f"Added pop ({slot}, {skillpoint})")
+
+        @pop.error
+        async def pop_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send("`$pop <slot_ignorecase> <skillpoint_ignorecase>`")
+
+        @self._bot.command(name='save')
+        async def save(ctx):
+            with open(PLAYER_DAT_FILE, 'r') as build_file:
+                build_data = json.load(build_file)
+            if not isinstance(build_data, list):
+                build_data = []
+            build_data.append(self.current_entry)
+            with open(PLAYER_DAT_FILE, 'w') as write_file:
+                json.dump(build_data, write_file, indent=4)
+            os.system(f"sh github_update.sh research")
+            self.current_entry["add"] = None
+            self.current_entry["pops"] = []
+            await ctx.send("Saved data (cleared add and pops)")
 
         @self._bot.command(name='hello')
         @binding
@@ -185,11 +296,6 @@ class DiscordBot():
                 await ctx.send("`$dc <PORT>`")
             elif isinstance(error, commands.BadArgument):
                 await ctx.send('Please verify that `<PORT>` is an integer.')
-
-        @self._bot.command(name='host')
-        async def host(ctx):
-            self._bind_channel = ctx.channel
-            await ctx.send('Bound to '+ctx.channel.name)
 
         @self._bot.command(name='newgame', aliases=['ng'])
         @binding
@@ -334,7 +440,6 @@ f'''{ATLAS} **Welcome to atlas games!** {ATLAS}
 here are a few helpful commands: ```ARM
 $hello -- pings the bot, returns the current hosting port (debug use)
 $dc <port> -- disconnect the bot running on the specified port (debug use)
-$host -- binds the bot to the current channel
 $newgame -- only after the bot is bound, starts a new round of atlas games
 $next -- starts the next day given that a game is already running
 $resume -- resume printing
