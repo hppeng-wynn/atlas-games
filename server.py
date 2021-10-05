@@ -243,8 +243,8 @@ class DiscordBot():
                         
                     old_item = self.current_entry["build"]["equips"][slot_idx[slot]]
                     for i, (loss, gain) in enumerate(zip(old_item.get('sp', [0]*5), item['sp'])):
-                        self.current_entry["build"]["sp"] -= loss
-                        self.current_entry["build"]["sp"] += gain
+                        self.current_entry["build"]["sp"][i] -= loss
+                        self.current_entry["build"]["sp"][i] += gain
                     self.current_entry["build"]["equips"][slot_idx[slot]] = item
                     await ctx.send(f"replaced {old_item['name']} with {item['name']}")
                     return
@@ -265,7 +265,7 @@ class DiscordBot():
             slot = abbreviate_slot(slot)
             old_item = self.current_entry["build"]["equips"][slot_idx[slot]]
             for i, loss in enumerate(old_item['sp']):
-                self.current_entry["build"]["sp"] -= loss
+                self.current_entry["build"]["sp"][i] -= loss
             self.current_entry["build"]["equips"][slot_idx[slot]] = {"id": -1, "name": default_slots[slot_idx[slot]]}
             await ctx.send(f"removed {slot} ({old_item['name']})")
 
