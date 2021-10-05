@@ -242,7 +242,7 @@ class DiscordBot():
                         return
                         
                     old_item = self.current_entry["build"]["equips"][slot_idx[slot]]
-                    for i, (loss, gain) in enumerate(zip(old_item['sp'], item['sp'])):
+                    for i, (loss, gain) in enumerate(zip(old_item.get('sp', [0]*5), item['sp'])):
                         self.current_entry["build"]["sp"] -= loss
                         self.current_entry["build"]["sp"] += gain
                     self.current_entry["build"]["equips"][slot_idx[slot]] = item
