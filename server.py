@@ -570,12 +570,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 entries = []
                 for entry in build_data:
                     build = entry["build"]
-                    val = '["'+'", "'.join(build['equips'][:-1])+'"]' + str(build['skillpoints']) + ' + ' + entry['add']['name'] + '->'
-                    val += ', '.join(build['pops'])
+                    val = '["'+'", "'.join(item['name'] for item in build['equips'][:-1])+'"]' + str(build['sp']) + ' + ' + entry['add']['name'] + '->'
+                    val += ', '.join(str(e) for e in entry['pops'])
                     entries.append(val)
-                print(entries)
-                message = '\n'.join(sorted(entries))
-                print(message)
+                message = '<br>'.join(sorted(entries))
             else:
                 message = "/api/help"
             self.wfile.write(bytes(message, "utf8"))
