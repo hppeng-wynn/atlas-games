@@ -39,7 +39,7 @@ def render_map(pois: List[Point], labels: List[str]):
     label_text_max_height = 0
     for i, label in enumerate(labels):
         txt, nlines = break_text(label, draw, LARGE_FONT, max_label_width)
-        _, pixel_height = draw.textsize(txt, font=LARGE_FONT.normal)
+        pixel_height = LARGE_FONT.size * nlines
         label_text_max_height = max(label_text_max_height, pixel_height)
         labels[i] = txt
 

@@ -38,7 +38,7 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
     active_fonts = [font.normal, font.bold]
     for content in mode_changes:
         if content == FontFormat.BOLD:
-            pixel_width, _ = draw.textsize(current_line, font=active_fonts[bold_mode])
+            pixel_width = draw.textlength(current_line, font=active_fonts[bold_mode])
             prev_length += pixel_width
             prev_text += r'\*'
             bold_mode = not bold_mode
@@ -58,11 +58,11 @@ def break_text(text: str, draw: ImageDraw, font: Font, max_width: float):
                 tmp_line = split_points[0]
                 has_text = True
             # Ignore height.
-            pixel_width, _ = draw.textsize(tmp_line, font=active_fonts[bold_mode])
+            pixel_width = draw.textlength(tmp_line, font=active_fonts[bold_mode])
             if pixel_width + prev_length > max_width:
                 if current_line == "" and prev_text == "":
                     for i in range(1, len(tmp_line)):
-                        pixel_width, _ = draw.textsize(tmp_line[:i], font=active_fonts[bold_mode])
+                        pixel_width = draw.textlength(tmp_line[:i], font=active_fonts[bold_mode])
                         if pixel_width + prev_length > max_width:
                             break
                     passing = i-1
@@ -110,7 +110,7 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
                 buf += t
             else:
                 #draw all text in buffer and flush buffer
-                width, height = draw.textsize(buf, font = curr_font)
+                width = draw.textlength(buf, font = curr_font)
                 draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
                 x_offset += width
                 buf = ''
@@ -128,7 +128,7 @@ def render_text(text: str, canvas: Image, draw: ImageDraw, font: ImageFont, pos:
                     italic = not italic
         
         #draw the buffered text at the end of the line
-        width, height = draw.textsize(buf, font = curr_font)
+        width = draw.textlength(buf, font = curr_font)
         draw.text((pos[0] + x_offset, pos[1] + i * line_height), buf, color, font = curr_font)
 
 def format_tokenize(text: str):

@@ -37,7 +37,9 @@ class DiscordBot():
     """
 
     def __init__(self):
-        self._bot = commands.Bot(command_prefix='$', help_command=None)
+        intents = discord.Intents.default()
+        intents.message_content = True
+        self._bot = commands.Bot(command_prefix='$', help_command=None, intents=intents)
 
         self._bot_running = False
         # self._client = discord.Client()
@@ -384,7 +386,7 @@ class DiscordBot():
             player = ctx.author
             player_id = str(player.id)
             player_name = player.name
-            player_img = str(player.avatar_url)
+            player_img = str(player.avatar.url)
             player_obj = {
                     "name": player_name,
                     "img": player_img,

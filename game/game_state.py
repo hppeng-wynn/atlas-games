@@ -63,7 +63,7 @@ class GameState:
         def download_imgs(urlmap: Mapping[str, str], idx_low: int, idx_high: int) -> List[Image]:
             for i in range(idx_low, idx_high):
                 image = Image.open(requests.get(name_url_data[i][1], stream=True).raw)
-                image.thumbnail((64, 64), Image.ANTIALIAS)
+                image.thumbnail((64, 64), Image.LANCZOS)
                 image = image.resize((64, 64))
                 img_map[name_url_data[i][0]] = image
 
