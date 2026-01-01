@@ -42,7 +42,7 @@ class DiscordBot():
         self._bot = commands.Bot(command_prefix='$', help_command=None, intents=intents)
 
         self._bot_running = False
-        # self._client = discord.Client()
+        # self._client = discord.Client(intents=intents)
         # Message queue for things to send (text for now)
         self._messages = Queue()
         self._message_send_pause = False
@@ -440,7 +440,7 @@ class DiscordBot():
                     self._world_data = json.load(open("game/world_data.json", 'r'))
                     self._event_data = json.load(open("game/event_data.json", 'r'))
                     self._player_data = json.load(open(PLAYER_DAT_FILE, 'r'))
-                    self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message)
+                    self._game = GameState(self._world_data, self._player_data, self._event_data, self.queue_message, bot=self._bot)
 
                     def player_highlighter(this: GameState, event_data):
                         ascent, descent = NORMAL_FONT.normal.getmetrics()

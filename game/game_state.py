@@ -37,7 +37,7 @@ class GameState:
     """
     Class holding the important info needed for the game.
     """
-    def __init__(self, world_data: dict, player_data: dict, event_data: dict, output_function=print, seed: int=None):
+    def __init__(self, world_data: dict, player_data: dict, event_data: dict, output_function=print, seed: int=None, bot = None):
         """
         world_data: World json
         player_data: player json
@@ -62,10 +62,24 @@ class GameState:
         img_map: Mapping[str, Image] = dict()
         def download_imgs(urlmap: Mapping[str, str], idx_low: int, idx_high: int) -> List[Image]:
             for i in range(idx_low, idx_high):
-                image = Image.open(requests.get(name_url_data[i][1], stream=True).raw)
+                try:
+                    image = Image.open(requests.get(name_url_data[i][2], stream=True).raw)
+                except Exception as e:
+                    print(f"User {name_url_data[i][1]} pfp changed, attempting sync")
+                    if bot is not None:
+                        user_id = int(name_url_data[i][0])
+                        user = bot.get_user(user_id)
+                        if user is None:
+                            print(f"User {user_id} not found...")
+                            raise e
+                        # TODO: writeback
+                        print(user.avatar_url)
+                        new_url = Image.open(requests.get(str(user.avatar_url), stream=True).raw)
+                    else:
+                        raise e
                 image.thumbnail((64, 64), Image.LANCZOS)
                 image = image.resize((64, 64))
-                img_map[name_url_data[i][0]] = image
+                img_map[name_url_data[i][1]] = image
 
         name_url_data = []
         keys = sorted(player_data.keys())
@@ -73,7 +87,7 @@ class GameState:
             data = player_data[k]
             if 'active' in data and not data['active']:
                 continue
-            name_url_data.append([data['name'], data.get('img', '')])
+            name_url_data.append([k, data['name'], data.get('img', '')])
 
         num_players = len(name_url_data)
         thread_objs = []

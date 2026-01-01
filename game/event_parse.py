@@ -33,6 +33,7 @@ with open(sys.argv[1], 'r') as input_file:
         if line.endswith('\n'):
             line = line[:-1]
         parts = line.split('\t')
+        print(parts)
         event_type = parts[7]
         event_data = {
             "text": parts[0],

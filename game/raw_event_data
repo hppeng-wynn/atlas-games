@@ -1,164 +1,193 @@
-{0} accidentally steps on a landmine.	1	0		1		0	accident	
-{0} visits #furry-containment-unit.	1	0		1		0	accident	
-{0} falls into the void while on a lootrun.	1	0		1		0	accident	Sky Islands
-{0}, {1}, and {2} are banned by the admins for duplicating cosmetics.	3	0, 1, 2		3		-1	accident	
-{0}, {1}, and {2} race across an open field. Unfortunately, it's a minefield.	3	0, 1, 2		3		0	accident	
-{0} gets stuck, and decides to /kill.	1	0		1		0	accident	
-{0} gets kicked off the server.	1	0		1		0	accident	
-{0} gets caught in Death Metal's arrow storm. Oops.	1	0		1		0	accident	Corkus
-{0} realizes why perfect play builds don't work with 1000 ping.	1	0		1		0	accident	
-{0} reads #guild-politics.	1	0		1		0	accident	
-{0} has a misadventure on the sea and enters the wrong cannon.	1	0		1		0	accident	
-{0} gives up and quits after finding out you need to prof to get housing materials.	1	0		1		0	accident	
-{0} quits to main Hypixel Skyblock.	1	0		1		0	accident	
-Oops, the server spiked! {0} is now dead.	1	0		1		0	accident	
-{0} falls into a pit and dies.	1	0		1		0	accident	
-{0} dies from -hpr	1	0		1		0	accident	
-{0} couldn't handle Weak Zombie [Level 1]	1	0		1		0	accident	Ragni
-{0} dies from -ls	1	0		1		0	accident	
-{0} tries to solo Panic Zealot but fails miserably	1	0		1		0	accident	SE-2
-{0} pings salted on accident and gets struck down	1	0		1		0	accident	
-{0} tells a joke in #water-cooler. They get banned by a board member.	1	0		1		0	accident	
-{0} and {1} fall prey to the colossal rat.	2	0, 1		2		0	accident	Ragni
-{0} fell out of the world.	1	0		1		0	accident	Sky Islands, SE-2
-{0} was fired from AIn for embezzlement of funds. (SMH)	1	0		1		0	accident	
-{0} chops down a tree for wood, but the tree falls down onto them.	1	0		1		0	accident	
-{0} takes an arrow to the knee. They fall over and die.	1	0		1		0	accident	
-{0} is eaten by the Eye.	1	0		1		0	accident	
-{0} falls out of a tree and lands on their neck. Whoops.	1	0		1		0	accident	
-{0} falls out of a tree and lands on {1}, breaking {1}'s neck. Whoops.	2	1		2		0	accident	
-{0} decides to hold up a trident during a thunderstorm and is struck by lightning. RIP	1	0		1		0	accident	
-{0} was blown up by Creeper.	1	0		1		0	accident	
-{0} gets run over by a llama. Or was that an alpaca?	1	0		1		0	accident	
-{0} gets killed by Lari. Owned.	1	0		1		0	accident	Light Forest
-{0} falls into the lava while on a lootrun.	1	0		1		0	accident	Molten Heights
-{0} and {1} bond over some Gargalon Gravy.	2			2		0	bond	
-{0} and {1} pet some wild wybels.	2			2		0	bond	
-{0} uwus at {1}.	2			2		0	bond	
-{0}, {1}, {2}, and {3} start a playthrough series.	4			4		0	bond	
-{0} and {1} see a herd of llamas. Or maybe alpacas?	2			2		0	bond	
-{0}, {1}, and {2} enjoy some stew from the island of Sugon.	3			3		0	bond	
-{0} and {1} discuss the lore.	2			2		0	bond	
-{0} and {1} search for the elusive 150k to 200k dps tierstack warrior builds.	2			2		0	bond	
-{0}, {1}, and {2} grind in herb cave.	3			3		0	bond	Troms
-{0}, {1} and {2} draw formulas on the sand.	3			3		0	bond	
-{0} and {1} make a campfire for warmth. 	2			2		0	bond	
-{0} fries a scrumptious coconut egg and shares it with {1}.	2			2		0	bond	
-{0} repeatedly stabs {1} to death with sais.	2	1	[0], [1]	0		0	combat	
-{0} catches {1} using flipped lapis and acts accordingly.	2	1		2		0	combat	
-{0} and {1} argue over a galleon rework to the point of starvation.	2	0, 1		2		0	combat	
-{0} 1984's {1} out of existence.	2	1	[0], [1]	0		0	combat	
-{0} gets killed the crossfire between {1} and {2}, but has 100% thorns and reflection.	3	0, 1, 2	[1], [2]	1		0	combat	
-{0} one-taps {1} using their heavy melee build.	2	1	[0], [1]	0		0	combat	
-{0} teaches {1} that defense doesn't work so well in pvp.	2	1	[0], [1]	0		0	combat	
-{0} tries stabbing {1}, but {0}'s agility allows them to dodge the attack, and they retreat.	2		[0], [1]	0		0	combat	
-{0} notices {1} venting, but it's too late. {1} snaps {0}'s neck.	2	0		2		0	combat	
-{0} launches {1} into the atmosphere with uppercut.	2	1	[0], [1]	0		0	combat	
-{0}, {1}, {2}, and {3} find out that {4} wants to NERF warrior and slit their throat.	5	4		5		0	combat	
-{0} gets hunted by {1} in a HICH run	2	0	[0], [1]	0		0	combat	
-{0} traps {1} in a corner, but is using WFA.	2		[0], [1]	0		0	combat	
-{0} and {1} have a fistfight. They starve to death.	2	0, 1	[0], [1]	0		0	combat	
-{0} summons a meteor onto {1} and {2}, killing both of them instantly.	3	1, 2	[0]	0	[1, 2]	0	combat	
-{0} teams up with Dr. Herbert von Legendary to take down {1}.	2	1	[0], [1]	1		0	combat	Corkus
-{0} kills {1} while they are afk.	2	1	[0], [1]	0		1	combat	
-{0} shows up to fight {1} and {2} in a Sans build. {1} and {2} have heart attacks.	3	1, 2	[0]	0	[1, 2]	0	combat	
-{0} impales {1}.	2	1	[0], [1]	0		0	combat	
-{0} beats {1} in a fist duel.	2	1	[0], [1]	0		0	combat	
-{0} uncorks a vicious deez nuts joke, obliterating {1}.	2	1		2		0	combat	
-{0}'s heavy spell meteor finds {1}, {2}, {3}, {4}, and {5} all farming.	6	1, 2, 3, 4, 5	[0]		[1, 2, 3, 4, 5]	0	combat	
-{0}, {1}, and {2} charge at {3}, but Shaman beam split kills all three.	4	0, 1, 2	[0], [1, 2, 3]	0		0	combat	
-{0} somehow missed the alert that {1}'s tower had aura and pays for it.	2	0	[0], [1]	0		1	combat	
-{0} backdoors the server and bans {1}.	2	1		2		-1	combat	
-{0} /classes while fighting {1} and gets instantly banned	2	0	[0], [1]	0		0	combat	
-{0} plays Amogus Drip too loudly, prompting a nearby {1} and {2} to gang up on them.	3	0	[0]	0	[1, 2]	0	combat	
-{0} couldn't RRR away from {1}'s Serious Series: Serious Punch in time.	2	0	[0], [1]	0		0	combat	
-{0} hacks into the Atlas Games bot and kills {1}.	2	1	[0], [1]	0		-1	combat	
-{0} closely defeats {1} in a one-on-one duel. Well played!	2	1	[0], [1]	0		0	combat	
-{0} is closely defeated by {1} in a one-on-one duel. Well played!	2	0	[0], [1]	0		0	combat	
-{0} figures out why eledefs do matter against {1}.	2	0	[0], [1]	0		0	combat	
-{0} thinks about home.	1			1		0	idle	
-{0} receives a deez nuts joke from Bothades.	1			1		0	idle	
-{0} fails to ambush {1} for best gummy.	2			2		0	idle	
-{0} grinds profs for Shadow of the Beast.	1			1		0	idle	Swamp
-{0} gets stuck in a wall, but /class-es out.	1			1		0	idle	
-{0} uses wynndata.tk in the morning, and the build loads by sunset.	1			1		0	idle	
-{0} has visions of a world where profs aren't clientside.	1			1		0	idle	
-{0} finds some Bothades Brew.	1			1		0	idle	
-{0} savors some Sugma Sauce.	1			1		0	idle	
-{0} enjoys some Amogus Aioli.	1			1		0	idle	
-{0} has visions of a world where lootruns are clientside.	1			1		0	idle	
-{0} jumps off a bridge, and solves the fall damage formula before hitting the ground.	1			1		0	idle	
-{0} experiments with heavy spell.	1			1		0	idle	
-{0} spends all day lootrunning for cold wave.	1			1		0	idle	
-{0} finally finds it: a tomato trellis that won't blow over or collapse under the weight of their tomato plants. It took them about an hour to make it with common materials ...	1			1		0	idle	
-{0} sacrifices Aledar again just for fun.	1			1		0	idle	SE-2
-{0} lost the game. Not the Atlas one. You know which one.	1			1		0	idle	
-{0} insinuates that grandfathers are hotter than grandmothers.	1			1		0	idle	
-{0}'s build is ruined by 1.20.3.	1			1		0	idle	
-{0} kills a Touroto with heavy poison King of Hearts.	1			1		0	idle	
-{0} feels like Archer in hotfix 2.	1			1		0	idle	
-{0} is scammed by {1}.	2			2		0	idle	
-{0} visits the trade market, but leaves empty handed.	1			1		0	idle	
-{0} raids a village and finds a few emeralds.	1			1		0	idle	
-{0} and {1} make a mythic trade.	2			2		0	idle	
-{0} tries to learn a spell combo.	1			1		0	idle	
-{0} completes their weekly objective.	1			1		0	idle	
-{0} decides to complete their weekly objective, but gives up because it's win 4 raids	1			1		0	idle	
-{0} realizes they have -300 thunder defense.	1			1		0	idle	
-{0} tries to use a tp scroll, but accidentally uses a skill reset scroll	1			1		0	idle	
-{0} uses Kelight's Toothbrush for its intended purpose.	1			1		0	idle	
-{0} completes spider build LI.	1			1		0	idle	Corkus
-{0} powders their weapon.	1			1		0	idle	
-{0} catches food poisoning after eating raw fish.	1			1		0	idle	
-{0} watches Iboju review an item, then realizes they can't afford it.	1			1		0	idle	
-{0} pokes the Eye.	1			1		0	idle	SE-2
-{0} creates a guild.	1			1		0	idle	
-{0} throws prof bombs.	1			1		0	idle	
-{0} is stuck in the tutorial.	1			1		0	idle	Ragni
-{0} gets a forums like from Salted.	1			1		0	idle	
-{0} can't find the bank. Turns out having zero intelligence can be an issue.	1			1		0	idle	
-{0} has massive skill issues.	1			1		0	idle	
-{0} spends their life savings on a merchant item.	1			1		0	idle	
-{0} mutters highbread item names to themself.	1			1		0	idle	
-{0} sits through Realm of Light III.	1			1		0	idle	Kander
-{0} buys another combat dummy.	1			1		0	idle	
-{0} pings {1} in #discord-link.	2			2		-1	idle	
-{0} trolls {1} using Ignis with -hpr.	2			2		0	idle	
-{0} realizes the Anima bug on wb is still not fixed.	1			1		0	idle	
-{0} runs from kantyr.	1			1		0	idle	SE-1
-{0} tries to snipe best gummy from {1}. {2} snipes it first.	3			3		-1	idle	
-{0} snorts an Air Powder VI.	1			1		0	idle	
-{0} defeats Jalapeno92, but throws him in water to make sure he dies.	1			1		0	idle	
-{0} touches grass for the first time in 5 years.	1			1		0	idle	
-{0} constructs a shack.	1			1		0	idle	
-{0} gets a new build from their Housing.	1			1		0	idle	
-{0} asks Jalapeno92 for advice.	1			1		0	idle	
-{0} works out.	1			1		0	idle	
-{0} studies math.	1			1		0	idle	
-{0} meditates. They are now one with the fish.	1			1		0	idle	
-{0} runs face first into a wall. Ouch.	1			1		0	idle	
-{0} fails a personality test.	1			1		0	idle	
-{0} gets canceled on twitter.	1			1		0	idle	
-{0} is arrested by a guard golem for their various war crimes.	1			1		0	idle	Kander
-{0} greets chat enthusiastically. Hello chat!	1			1		0	idle	
-{0} equips a loot set.	1			1		0	idle	
-{0} chops down a tree for wood.	1			1		0	idle	
-{0} has hallunications after visiting the mushroom forest.	1			1		0	idle	
-{0} updates Wynnbuilder.	1			1		0	idle	
-{0} decides to hold up a trident during a thunderstorm and is struck by lightning. They survive, but are badly burned.	1			1		0	idle	
-{0} finds a bug in WynnBuilder.	1			1		0	idle	
-{0} stays up all night debugging their code.	1			1		0	idle	
-{0} takes advice from {1} and invests their wagbuck.	2		[0, 1]	0		0	team	
-{0}, {1}, and {2} attempt to stone {3} for using javascript, but their C++ code doesn't work.	4		[0, 1, 2], [3]	0		0	team	
-{0}, {1}, {2}, and conquer the Nest of the Grootslangs.	3		[0, 1, 2]	0		0	team	Swamp
-{0} complains that they aren't strong enough. {1} calls it a skill issue.	2		[0, 1]	0		0	team	
-{0} challenges {1} to boat across gavel.	2		[0, 1]	0		0	team	Lake Gylia
-{0}, {1}, and {2} hunt proffers.	3		[0, 1, 2]	0		0	team	
-{0} "reveals" that {1} is their alt.	2		[0, 1]	0		-1	team	
-{0} plays tag with {1}.	2		[0, 1]	0		0	team	
-{0} blows by {1} and {2} in a walk speed set. {1} and {2} are jealous.	3		[1, 2]	1		1	team	
-{0}, {1}, {2}, and {3} try clearing Orphion's Nexus of Light, but are all slain by the sanitizing void.	4	0, 1, 2, 3	[0, 1, 2, 3]	0		0	team-accident	Light Forest
-{0} and {1} fail to kill a wretch in time.	2	0, 1	[0, 1]	0		0	team-accident	SE-2
-{0} and {1} abuse sp pots to defeat {2} and {3}.	4	2, 3	[0, 1]	2		0	team-accident	
-{0} and {1} get ambushed by {2} and {3} while they were leveling profs.	4	0, 1	[0, 1], [2, 3]	0		0	team-accident	
-{0} and {1} make a campfire for warmth. They burn down the surroundings.	2	0, 1	[0, 1]	0		0	team-accident	
+{0} accidentally steps on a landmine.	1	0		1		0	accident					
+{0} visits #furry-containment-unit.	1	0		1		0	accident		lmfao			
+{0} falls into the void while on a lootrun.	1	0		1		0	accident	Sky Islands				
+{0}, {1}, and {2} are banned by the admins for duplicating cosmetics.	3	0, 1, 2		3		-1	accident					
+{0}, {1}, and {2} race across an open field. Unfortunately, it's a minefield.	3	0, 1, 2		3		0	accident					
+{0} gets stuck, and decides to /kill.	1	0		1		0	accident					
+{0} gets kicked off the server.	1	0		1		0	accident					
+{0} gets caught in Death Metal's arrow storm. Oops.	1	0		1		0	accident	Corkus				
+{0} realizes why perfect play builds don't work with 1000 ping.	1	0		1		0	accident		:holyshit:	doom		
+{0} reads #guild-politics.	1	0		1		0	accident		lol death			
+{0} has a misadventure on the sea and enters the wrong cannon.	1	0		1		0	accident					
+{0} gives up and quits after finding out you need to prof to get housing materials.	1	0		1		0	accident		death? i guess kind of	death?		
+{0} quits to main Hypixel Skyblock.	1	0		1		0	accident			:enraged:		
+Oops, the server spiked! {0} is now dead.	1	0		1		0	accident					
+{0} falls into a pit and dies.	1	0		1		0	accident					
+{0} dies from -hpr	1	0		1		0	accident		how	:whathow:	:like:	
+{0} couldn't handle Weak Zombie [Level 1]	1	0		1		0	accident	Ragni			its funny it should stay	
+{0} dies from -ls	1	0		1		0	accident					
+{0} tries to solo Panic Zealot but fails miserably	1	0		1		0	accident	SE-2				
+{0} pings salted on accident and gets struck down	1	0		1		0	accident					
+{0} tells a joke in #water-cooler. They get banned by a board member.	1	0		1		0	accident		wtf death lmao	have you met 100 decs???		
+{0} and {1} fall prey to the colossal rat.	2	0, 1		2		0	accident	Ragni				
+{0} fell out of the world.	1	0		1		0	accident	Sky Islands, SE-2				
+{0} was fired from AIn for embezzlement of funds. (SMH)	1	0		1		0	accident					
+{0} chops down a tree for wood, but the tree falls down onto them.	1	0		1		0	accident					
+{0} takes an arrow to the knee. They fall over and die.	1	0		1		0	accident					
+{0} is eaten by the Eye.	1	0		1		0	accident					
+{0} falls out of a tree and lands on their neck. Whoops.	1	0		1		0	accident					
+{0} falls out of a tree and lands on {1}, breaking {1}'s neck. Whoops.	2	1		2		0	accident					
+{0} decides to hold up a trident during a thunderstorm and is struck by lightning. RIP	1	0		1		0	accident					
+{0} was blown up by Creeper.	1	0		1		0	accident					
+{0} gets run over by a llama. Or was that an alpaca?	1	0		1		0	accident					
+{0} gets killed by Lari. Owned.	1	0		1		0	accident	Light Forest	hmm			
+{0} falls into the lava while on a lootrun.	1	0		1		0	accident	Molten Heights				
+{0} and {1} bond over some Gargalon Gravy.	2			2		0	bond		SPECIAL EVENT			
+{0} and {1} pet some wild wybels.	2			2		0	bond					
+{0} uwus at {1}.	2			2		0	bond					
+{0}, {1}, {2}, and {3} start a playthrough series.	4			4		0	bond		hmmm.			
+{0} and {1} see a herd of llamas. Or maybe alpacas?	2			2		0	bond					
+{0}, {1}, and {2} enjoy some stew from the island of Sugon.	3			3		0	bond		mm what if Stew from the island of Sugon			:holyshit:
+{0} and {1} discuss the lore.	2			2		0	bond					
+{0} and {1} search for the elusive 150k to 200k dps tierstack warrior builds.	2			2		0	bond					
+{0}, {1}, and {2} grind in herb cave.	3			3		0	bond	Troms				
+{0}, {1} and {2} draw formulas on the sand.	3			3		0	bond					
+{0} and {1} make a campfire for warmth. 	2			2		0	bond					
+{0} fries a scrumptious coconut egg and shares it with {1}.	2			2		0	bond					
+{0} repeatedly stabs {1} to death with sais.	2	1	[0], [1]	0		0	combat					
+{0} catches {1} using flipped lapis and acts accordingly.	2	1		2		0	combat					
+{0} and {1} argue over a galleon rework to the point of starvation.	2	0, 1		2		0	combat					
+{0} 1984's {1} out of existence.	2	1	[0], [1]	0		0	combat					
+{0} gets killed the crossfire between {1} and {2}, but has 100% thorns and reflection.	3	0, 1, 2	[1], [2]	1		0	combat					
+{0} one-taps {1} using their heavy melee build.	2	1	[0], [1]	0		0	combat					
+{0} teaches {1} that defense doesn't work so well in pvp.	2	1	[0], [1]	0		0	combat					
+{0} tries stabbing {1}, but {1}'s agility allows them to dodge the attack, and they retreat.	2		[0], [1]	0		0	combat					
+{0} notices {1} venting, but it's too late. {1} snaps {0}'s neck.	2	0		2		0	combat					
+{0} launches {1} into the atmosphere with uppercut.	2	1	[0], [1]	0		0	combat					
+{0}, {1}, {2}, and {3} find out that {4} wants to NERF warrior and slit their throat.	5	4		5		0	combat		owned	5 people less go		
+{0} gets hunted by {1} in a HICH run	2	0	[0], [1]	0		0	combat					
+{0} traps {1} in a corner, but is using WFA.	2		[0], [1]	0		0	combat					
+{0} and {1} have a fistfight. They starve to death.	2	0, 1	[0], [1]	0		0	combat					
+{0} summons a meteor onto {1} and {2}, killing both of them instantly.	3	1, 2	[0]	0	[1, 2]	0	combat					
+{0} teams up with Dr. Herbert von Legendary to take down {1}.	2	1	[0], [1]	0		0	combat	Corkus				
+{0} kills {1} while they are afk.	2	1	[0], [1]	0		1	combat		this doesn't really need movement I think... guess its just a death			
+{0} shows up to fight {1} and {2} in a Sans build. {1} and {2} have heart attacks.	3	1, 2	[0]	0	[1, 2]	0	combat					
+{0} impales {1}.	2	1	[0], [1]	0		0	combat					
+{0} beats {1} in a fist duel.	2	1	[0], [1]	0		0	combat					
+{0} uncorks a vicious deez nuts joke, obliterating {1}.	2	1		2		0	combat		oinuk intensifies	so true		
+{0}'s heavy spell meteor finds {1}, {2}, {3}, {4}, and {5} all farming.	6	1, 2, 3, 4, 5	[0]	0	[1, 2, 3, 4, 5]	0	combat		obliterated	I'll probably change these to like just variadic enemies for all the group fight ones		
+{0}, {1}, and {2} charge at {3}, but Shaman beam split kills all three.	4	0, 1, 2	[0], [1, 2, 3]	0		0	combat		class req: shaman /s	except this one		
+{0} somehow missed the alert that {1}'s tower had aura and pays for it.	2	0	[0], [1]	0		1	combat			fixed		
+{0} backdoors the server and bans {1}.	2	1		2		-1	combat					
+{0} /classes while fighting {1} and gets instantly banned	2	0	[0], [1]	0		0	combat					
+{0} plays Amogus Drip too loudly, prompting a nearby {1} and {2} to gang up on them.	3	0	[0]	0	[1, 2]	0	combat					
+{0} couldn't RRR away from {1}'s Serious Series: Serious Punch in time.	2	0	[0], [1]	0		0	combat					
+{0} hacks into the Atlas Games bot and kills {1}.	2	1	[0], [1]	0		-1	combat		DOES NOT REQUIRE PROXIMITY.			
+{0} closely defeats {1} in a one-on-one duel. Well played!	2	1	[0], [1]	0		0	combat					
+{0} is closely defeated by {1} in a one-on-one duel. Well played!	2	0	[0], [1]	0		0	combat					
+{0} figures out why eledefs do matter against {1}.	2	0	[0], [1]	0		0	combat					
+{0} thinks about home.	1			1		0	idle					
+{0} receives a deez nuts joke from Bothades.	1			1		0	idle					
+{0} fails to ambush {1} for best gummy.	2			2		0	idle					
+{0} grinds profs for Shadow of the Beast.	1			1		0	idle	Swamp				
+{0} gets stuck in a wall, but /class-es out.	1			1		0	idle					
+{0} uses wynndata.tk in the morning, and the build loads by sunset.	1			1		0	idle		lmao			
+{0} has visions of a world where profs aren't clientside.	1			1		0	idle					
+{0} finds some Bothades Brew.	1			1		0	idle					
+{0} savors some Sugma Sauce.	1			1		0	idle					
+{0} enjoys some Amogus Aioli.	1			1		0	idle		ty			
+{0} has visions of a world where lootruns are clientside.	1			1		0	idle					
+{0} jumps off a bridge, and solves the fall damage formula before hitting the ground.	1			1		0	idle					
+{0} experiments with heavy spell.	1			1		0	idle					
+{0} spends all day lootrunning for cold wave.	1			1		0	idle					
+{0} finally finds it: a tomato trellis that won't blow over or collapse under the weight of their tomato plants. It took them about an hour to make it with common materials ...	1			1		0	idle		lmaooo	great one		
+{0} sacrifices Aledar again just for fun.	1			1		0	idle	SE-2	lmfao			
+{0} lost the game. Not the Atlas one. You know which one.	1			1		0	idle					
+{0} insinuates that grandfathers are hotter than grandmothers.	1			1		0	idle					
+{0}'s build is ruined by 1.20.3.	1			1		0	idle					
+{0} kills a Touroto with heavy poison King of Hearts.	1			1		0	idle		@crokee	:whathow:		
+{0} feels like Archer in hotfix 2.	1			1		0	idle					
+{0} is scammed by {1}.	2			2		0	idle					
+{0} visits the trade market, but leaves empty handed.	1			1		0	idle					
+{0} raids a village and finds a few emeralds.	1			1		0	idle					
+{0} and {1} make a mythic trade.	2			2		0	idle					
+{0} tries to learn a spell combo.	1			1		0	idle					
+{0} completes their weekly objective.	1			1		0	idle					
+{0} decides to complete their weekly objective, but gives up because it's win 4 raids	1			1		0	idle					
+{0} realizes they have -300 thunder defense.	1			1		0	idle					
+{0} tries to use a tp scroll, but accidentally uses a skill reset scroll	1			1		0	idle					
+{0} uses Kelight's Toothbrush for its intended purpose.	1			1		0	idle					
+{0} completes spider build LI.	1			1		0	idle	Corkus				
+{0} powders their weapon.	1			1		0	idle					
+{0} catches food poisoning after eating raw fish.	1			1		0	idle		<- this column is reserved			
+{0} watches Iboju review an item, then realizes they can't afford it.	1			1		0	idle					
+{0} pokes the Eye.	1			1		0	idle	SE-2				
+{0} creates a guild.	1			1		0	idle					
+{0} throws prof bombs.	1			1		0	idle					
+{0} is stuck in the tutorial.	1			1		0	idle	Ragni				
+{0} gets a forums like from Salted.	1			1		0	idle					
+{0} can't find the bank. Turns out having zero intelligence can be an issue.	1			1		0	idle					
+{0} has massive skill issues.	1			1		0	idle					
+{0} spends their life savings on a merchant item.	1			1		0	idle		M			
+{0} mutters highbread item names to themself.	1			1		0	idle					
+{0} sits through Realm of Light III.	1			1		0	idle	Kander	lol		this deserves a death	
+{0} buys another combat dummy.	1			1		0	idle		m			
+{0} pings {1} in #discord-link.	2			2		-1	idle					
+{0} trolls {1} using Ignis with -hpr.	2			2		0	idle					
+{0} realizes the Anima bug on wb is still not fixed.	1			1		0	idle					
+{0} runs from kantyr.	1			1		0	idle	SE-1	only in SE			
+{0} tries to snipe best gummy from {1}. {2} snipes it first.	3			3		-1	idle		no proximity required			
+{0} snorts an Air Powder VI.	1			1		0	idle		doom	is this a death		
+{0} defeats Jalapeno92, but throws him in water to make sure he dies.	1			1		0	idle					
+{0} touches grass for the first time in 5 years.	1			1		0	idle					
+{0} constructs a shack.	1			1		0	idle					
+{0} gets a new build from their Housing.	1			1		0	idle			who dis		
+{0} asks Jalapeno92 for advice.	1			1		0	idle					
+{0} works out.	1			1		0	idle					
+{0} studies math.	1			1		0	idle					
+{0} meditates. They are now one with the fish.	1			1		0	idle					
+{0} runs face first into a wall. Ouch.	1			1		0	idle					
+{0} fails a personality test.	1			1		0	idle					
+{0} gets canceled on twitter.	1			1		0	idle					
+{0} is arrested by a guard golem for their various war crimes.	1			1		0	idle	Kander				
+{0} greets chat enthusiastically. Hello chat!	1			1		0	idle					
+{0} equips a loot set.	1			1		0	idle					
+{0} chops down a tree for wood.	1			1		0	idle					
+{0} has hallunications after visiting the mushroom forest.	1			1		0	idle					
+{0} updates Wynnbuilder.	1			1		0	idle					
+{0} decides to hold up a trident during a thunderstorm and is struck by lightning. They survive, but are badly burned.	1			1		0	idle					
+{0} finds a bug in WynnBuilder.	1			1		0	idle					
+{0} stays up all night debugging their code.	1			1		0	idle					
+{0} takes advice from {1} and invests their wagbuck.	2		[0, 1]	0		0	team					
+{0}, {1}, and {2} attempt to stone {3} for using javascript, but their C++ code doesn't work.	4		[0, 1, 2], [3]	0		0	team					
+{0}, {1}, {2}, and conquer the Nest of the Grootslangs.	3		[0, 1, 2]	0		0	team	Swamp				
+{0} complains that they aren't strong enough. {1} calls it a skill issue.	2		[0, 1]	0		0	team					
+{0} challenges {1} to boat across gavel.	2		[0, 1]	0		0	team	Lake Gylia				
+{0}, {1}, and {2} hunt proffers.	3		[0, 1, 2]	0		0	team					
+{0} "reveals" that {1} is their alt.	2		[0, 1]	0		-1	team		works only if 0 and 1 are team	added "" so I don't have to track actual altness	all the coop multipl player ones are going to be team	
+{0} plays tag with {1}.	2		[0, 1]	0		0	team					
+{0} blows by {1} and {2} in a walk speed set. {1} and {2} are jealous.	3		[1, 2]	1		1	team					
+{0}, {1}, {2}, and {3} try clearing Orphion's Nexus of Light, but are all slain by the sanitizing void.	4	0, 1, 2, 3	[0, 1, 2, 3]	0		0	team-accident	Light Forest				
+{0} and {1} fail to kill a wretch in time.	2	0, 1	[0, 1]	0		0	team-accident	SE-2				
+{0} and {1} abuse sp pots to defeat {2} and {3}.	4	2, 3	[0, 1]	2		0	team-accident					
+{0} and {1} get ambushed by {2} and {3} while they were leveling profs.	4	0, 1	[0, 1], [2, 3]	0		0	team-accident					
+{0} and {1} make a campfire for warmth. They burn down the surroundings.	2	0, 1	[0, 1]	0		0	team-accident		:holyshit:	skill issue		
+{0}, {1}, {2} and {3} tried guild raiding TCC, but {0} kept tanking the flying sword. Everyone dies.	4	0, 1, 2, 3	[0, 1, 2, 3]	0		0	team-accident	Canyon-2	anything I type here may be wrongly formatted		Canyon-1 is by qira, canyon-2 is kandon -- itech	
+{0} defeated Annihilation, but received a Bloodbath.	1			1		0	idle	Roots of Corruption				
+{0} and {1} bond over their shared hatred for Flying Kick.	2			2		0	bond					
+{0} floods the market with Dwindled Knowledges. This causes {1} to lose their life's savings.	2			2		-1	idle					
+{0} dies while trying to raid in a prof server.	1	0		1		0	accident					
+{0} puts a hit on {1}. LinnyFlower answers. {1} is killed instantly.	2	1	[0], [1]	0		0	combat					
+As the sun rises, {0} no longer feels safer.	1			1		0	idle					
+{0} opened #guild-community.	1	0		1		0	accident		Removed old description: Their bodies are found frothing at the mouth and covered in lesions.			
+{0} convinces {1} to open #guild-community.	2	1		2		0	accident		Removed old description: Their bodies are found frothing at the mouth and covered in lesions.			
+{0} makes a custom item. It is severely unbalanced.	1			1		0	idle					
+{0} equips a Divzer build. They kill {1} and {2} and then die to a lv. 6 Forest Spiderling.	3	0, 1, 2	[0], [1,2]	0		1	combat	Nivla Forest				
+{0} steps foot into Wynnmain and receives a heart attack.	1	0		1		0	accident					
+{0} nerfs Fallen. An angry mob tears them limb from limb.	1	0		1		0	accident					
+{0} showcases Alkatraz tstack Fallen gameplay to their livestream, but dies to Mummyboard.	1	0		1		0	accident	Corkus		Location: LI		
+{0} randomly takes fall damage and dies.	1	0		1		0	accident					
+{0} killed Solar Vanguard too quickly.	1	0		1		0	accident	Canyon-1		location: qira hive		
+{0}, {1} and {2} look for a fourth AIN member to raid with. They die of old age.	3	0, 1, 2	[0, 1, 2]	0		0	team-accident					
+{0} gets the Ragni ball to Jofash, at which point it sinks into the sand.	1			1		0	idle	Jofash Docks				
+{0} lures zombies into Detlas, killing {1}.	2	1	[0], [1]	0		0	combat	Detlas				
+{0}'s brain atrophies. Too much Lightbender.	1	0		1		0	accident					
+{0} reached level 130 in Weaponsmithing!	1			1		0	idle					
+{0} and {1} do Fate of the Olm together.	2		[0,1]	0		0	team	SE-1				
+{0} says "67".	1			1		0	idle					
+{0} rizzes up {1}.	2		[0,1]	0		0	team					
+{0} applies 9 marks to {1}, then Surprise Strike Satsujin Rage Quakes them for 5 million damage.	2	1	[0],[1]	2		0	combat					
+{0} shouts something about their furry vore guild. {1} doesn't survive reading it.	2	1	[0],[1]	2		-1	combat					
+{0} decides to be {1}'s healslave, allowing them to defeat {2}.	3	2	[0,1],[2]	1		0	combat					
+{0} listens to what Duat has to say in #water-cooler.	1			1		0	idle					
+{0} loses all their items in a bank glitch.	1			1		0	idle					
